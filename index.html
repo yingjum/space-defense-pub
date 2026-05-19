@@ -86,6 +86,33 @@
     border:1px solid #344256; color:#cfe; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; }
   #musicbtn { position:absolute; top:46px; left:12px; z-index:10; background:rgba(20,26,34,.85);
     border:1px solid #344256; color:#cfe; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; }
+  /* 建造位弹出菜单（出现在该建造位旁边） */
+  #buildMenu { position:absolute; display:none; z-index:14; transform:translate(-50%,-115%);
+    background:rgba(18,24,32,.96); border:1px solid #3a4658; border-radius:10px;
+    padding:6px; gap:5px; box-shadow:0 8px 24px rgba(0,0,0,.5); }
+  #buildMenu.on { display:flex; }
+  #buildMenu .bm { width:64px; background:#232d3b; border:1px solid #344256; border-radius:8px;
+    padding:6px 3px; text-align:center; cursor:pointer; transition:.1s; }
+  #buildMenu .bm:hover { background:#2c3a4d; }
+  #buildMenu .bm.dis { opacity:.4; }
+  #buildMenu .bm .nm { font-size:11px; color:#e6e9ef; margin-top:1px; }
+  #buildMenu .bm .ct { font-size:11px; color:#f5c451; }
+  #buildMenu .bm canvas { display:block; margin:0 auto; }
+  /* 选中塔后的顶部面板 */
+  #topPanel { position:absolute; display:none; z-index:13; left:480px; top:10px;
+    transform:translateX(-50%); width:430px; max-width:62vw;
+    background:rgba(18,24,32,.95); border:1px solid #3a4658; border-radius:10px;
+    padding:9px 12px; font-size:12px; box-shadow:0 6px 20px rgba(0,0,0,.45); }
+  #topPanel.on { display:block; }
+  #topPanel .stat { color:#9fb0c4; line-height:1.6; margin-top:2px; }
+  #topPanel .bar { height:7px; background:#2a2f3a; border-radius:4px; margin-top:6px; overflow:hidden; }
+  #topPanel .bar>i { display:block; height:100%; }
+  #topPanel .row { display:flex; gap:6px; margin-top:7px; }
+  #topPanel .row button { flex:1; padding:8px; font-size:12px; border-radius:6px; border:none; cursor:pointer; color:#fff; }
+  body.tablet #topPanel .row button { padding:11px; font-size:13px; }
+  .bUp{background:#3a7d44;} .bAmmo{background:#b08018;} .bSell{background:#8a3a3a;}
+  #pClose { position:absolute; right:7px; top:5px; background:none; border:none; color:#8b97a8;
+    font-size:16px; cursor:pointer; padding:2px 5px; }
 </style>
 </head>
 <body>
@@ -96,6 +123,8 @@
     <button id="speedbtn">▶ 1x</button>
     <button id="musicbtn">♪ 音乐</button>
     <div id="msg"></div>
+    <div id="buildMenu"></div>
+    <div id="topPanel"></div>
 
     <div id="side">
       <div class="hud">
@@ -104,12 +133,11 @@
         <div class="chip wave">波次 <b id="hWave">0/0</b></div>
         <div class="chip mine">矿 <b id="hMine">0</b></div>
       </div>
-      <h3>建造防御塔</h3>
-      <div class="towers" id="towerList"></div>
-      <div id="selPanel"></div>
+      <div id="towerList" style="display:none"></div>
+      <div id="selPanel" style="display:none"></div>
       <button class="act" id="supplyAll">⚙ 全部补给（弹药+武器）</button>
       <button class="act" id="waveBtn">▶ 开始第 1 波</button>
-      <p class="hint">点击路边的<b>建造位</b>放塔。<br>塔弹药耗尽会变灰停火；<br>兵营士兵不耗弹药，但武器会损耗。<br>矿不打怪获得——每通一关 +1 矿。</p>
+      <p class="hint"><b>点路边的建造位</b>，旁边会弹出可建的建筑直接选。<br>点已建的塔可升级；满级后可买两个特性。<br>塔弹药耗尽会变灰停火；兵营士兵不耗弹药但武器会损耗。<br>矿不打怪获得——每通一关 +1 矿。</p>
     </div>
 
     <div class="overlay" id="ovMenu">
@@ -184,8 +212,8 @@ const TOWERS={
   cannon:{ color:'#c2773a', kind:'ammo', cost:110, desc:'范围溅射 → 升级火焰塔(持续伤害)',
     tiers:[
       {name:'炮塔',   range:120, dmg:30, rate:1.1,  ammoMax:16, ammoCost:4, splash:55, air:false, type:'phys'},
-      {name:'重炮塔', range:126, dmg:38, rate:1.05, ammoMax:19, ammoCost:4, splash:60, air:false, type:'phys'},
-      {name:'火焰塔', range:132, dmg:46, rate:1.0,  ammoMax:22, ammoCost:5, splash:64, air:false, type:'phys', burn:15, burnT:3, evo:1},
+      {name:'重炮塔', range:124, dmg:30, rate:1.15, ammoMax:18, ammoCost:4, splash:50, air:false, type:'phys'},
+      {name:'火焰塔', range:128, dmg:33, rate:1.1,  ammoMax:20, ammoCost:5, splash:52, air:false, type:'phys', burn:10, burnT:3, evo:1},
     ],
     perks:[ {key:'napalm', name:'燃油弹', desc:'落点留下燃烧地带，持续灼伤经过的敌人 4 秒'},
             {key:'bigblast', name:'巨型弹', desc:'溅射范围 +45%'} ]},
@@ -215,16 +243,19 @@ const MAPS=[
     path:[[0,120],[200,120],[200,300],[420,300],[420,140],[640,140],[640,420],[860,420],[860,260],[960,260]] },
   { name:'林间小道', diff:'mid',  lives:20,
     path:[[0,500],[150,500],[150,260],[330,260],[330,480],[520,480],[520,200],[700,200],[700,440],[860,440],[860,120],[960,120]] },
-  { name:'曲折峡谷', diff:'mid',  lives:18,
-    path:[[80,0],[80,180],[260,180],[260,40],[440,40],[440,260],[200,260],[200,440],[440,440],[440,580],[700,580],[700,360],[900,360],[900,140],[960,140]] },
+  { name:'曲折峡谷', diff:'mid',  lives:18, fork:1,
+    routes:[ [[0,110],[210,110],[210,330],[440,330],[440,110],[680,110],[680,500],[960,500]],
+             [[0,110],[210,110],[210,500],[440,500],[440,330],[680,330],[680,500],[960,500]] ] },
   { name:'回环要塞', diff:'hard', lives:18,
     path:[[0,300],[160,300],[160,120],[360,120],[360,320],[180,320],[180,500],[480,500],[480,160],[660,160],[660,420],[840,420],[840,220],[960,220]] },
-  { name:'蛇形山道', diff:'hard', lives:16,
-    path:[[0,80],[180,80],[180,260],[60,260],[60,440],[300,440],[300,180],[500,180],[500,500],[700,500],[700,260],[560,260],[560,120],[820,120],[820,520],[960,520]] },
+  { name:'蛇形山道', diff:'hard', lives:16, fork:1,
+    routes:[ [[0,90],[180,90],[180,300],[420,300],[420,90],[660,90],[660,520],[960,520]],
+             [[0,90],[180,90],[180,520],[420,520],[420,300],[660,300],[660,520],[960,520]] ] },
   { name:'熔岩迷宫', diff:'hard', lives:16,
     path:[[120,0],[120,200],[300,200],[300,60],[480,60],[480,300],[260,300],[260,480],[520,480],[520,220],[720,220],[720,460],[880,460],[880,200],[700,200],[700,40],[960,40]] },
-  { name:'终焉回廊', diff:'hard', lives:15,
-    path:[[0,320],[140,320],[140,100],[320,100],[320,360],[180,360],[180,540],[460,540],[460,120],[620,120],[620,420],[420,420],[420,300],[800,300],[800,80],[600,80],[600,200],[960,200]] },
+  { name:'终焉回廊', diff:'hard', lives:15, fork:1,
+    routes:[ [[0,520],[200,520],[200,300],[440,300],[440,520],[680,520],[680,120],[960,120]],
+             [[0,520],[200,520],[200,120],[440,120],[440,300],[680,300],[680,120],[960,120]] ] },
 ];
 
 function wavesFor(mi){
@@ -240,6 +271,8 @@ function wavesFor(mi){
   return W;
 }
 MAPS.forEach((m,i)=>m.waves=wavesFor(i));
+// 统一：单线地图也包成 routes；m.path = 主线（兼容旧引用）
+MAPS.forEach(m=>{ if(!m.routes) m.routes=[m.path]; m.path=m.routes[0]; });
 
 /* ---------- 路径与建造位 ---------- */
 function pathLen(p){ let L=0; for(let i=1;i<p.length;i++) L+=dist(p[i-1][0],p[i-1][1],p[i][0],p[i][1]); return L; }
@@ -255,25 +288,36 @@ function segDist(px,py,a,b){
   return dist(px,py,a[0]+t*dx,a[1]+t*dy);
 }
 function minPathDist(px,py,p){ let m=1e9; for(let i=1;i<p.length;i++) m=Math.min(m,segDist(px,py,p[i-1],p[i])); return m; }
-function genPads(path){
-  const pads=[], total=pathLen(path), off=56;
-  const target=Math.max(10,Math.min(20,Math.round(total/200)));  // ~12，路越长按比例越多
-  for(let i=0;i<target;i++){
-    const d=(i+0.5)*total/target;
-    const a=pointAt(path,d), b=pointAt(path,Math.min(d+5,total));
-    let nx=-(b.y-a.y), ny=(b.x-a.x); const L=Math.hypot(nx,ny)||1; nx/=L; ny/=L;
-    for(const s of (i%2?[1,-1]:[-1,1])){
-      const px=a.x+nx*off*s, py=a.y+ny*off*s;
-      if(px<24||px>936||py<24||py>596) continue;
-      if(minPathDist(px,py,path)<46) continue;     // 路加宽后远离路面
-      if(pads.some(q=>dist(q.x,q.y,px,py)<50)) continue;
-      pads.push({x:px,y:py,tower:null}); break;
+function minRoutesDist(px,py,routes){ let m=1e9; for(const p of routes){ const v=minPathDist(px,py,p); if(v<m)m=v; } return m; }
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+// 沿每条路边生成建造位：间距不均匀（有集中簇、有稀疏段），多线 => 自动更多塔位
+function genPads(routes, seed){
+  const rnd=mulberry32(((seed|0)+1)*99991), pads=[];
+  for(const path of routes){
+    const total=pathLen(path);
+    let d = 50 + rnd()*70;
+    while(d < total-36){
+      const cluster = rnd()<0.32 ? (2 + (rnd()<0.4?1:0)) : 1;   // 偶尔 2~3 个挤在一起
+      for(let c=0;c<cluster;c++){
+        const dd=d+c*32, a=pointAt(path,dd), b=pointAt(path,Math.min(dd+5,total));
+        let nx=-(b.y-a.y), ny=(b.x-a.x); const L=Math.hypot(nx,ny)||1; nx/=L; ny/=L;
+        const off=54 + (rnd()*14-2);
+        for(const s of (rnd()<0.5?[1,-1]:[-1,1])){
+          const px=a.x+nx*off*s, py=a.y+ny*off*s;
+          if(px<24||px>936||py<24||py>596) continue;
+          if(minRoutesDist(px,py,routes)<46) continue;          // 远离任何一条路
+          if(pads.some(q=>dist(q.x,q.y,px,py)<44)) continue;
+          pads.push({x:px,y:py,tower:null}); break;
+        }
+      }
+      d += (rnd()<0.28 ? 64+rnd()*40 : 150+rnd()*150);          // 密集簇 vs 大间隔
     }
   }
   return pads;
 }
 /* ---------- 宇宙背景（星空 + 星球） ---------- */
-function genSpace(path){
+function genSpace(routes){
   const stars=[];
   for(let i=0;i<155;i++) stars.push({ x:Math.random()*GW, y:Math.random()*GH,
     r:Math.random()*1.5+0.3, ph:Math.random()*6.28, sp:0.5+Math.random()*1.6 });
@@ -282,7 +326,7 @@ function genSpace(path){
   const planets=[]; let tries=0;
   while(planets.length<4 && tries<400){ tries++;
     const r=24+Math.random()*36, x=70+Math.random()*800, y=60+Math.random()*500;
-    if(minPathDist(x,y,path)<r+48) continue;
+    if(minRoutesDist(x,y,routes)<r+48) continue;
     if(planets.some(p=>dist(p.x,p.y,x,y)<p.r+r+46)) continue;
     const c=pals[(Math.random()*pals.length)|0];
     planets.push({ x,y,r, c0:c[0], c1:c[1], ring:Math.random()<0.42, rot:Math.random()*6.28 });
@@ -356,6 +400,9 @@ class Enemy{
     this.r=d.r; this.air=d.air; this.dist=0; this.slowT=0; this.slowF=1; this.dead=false; this.leaked=false;
     this.blocker=null; this.burnT=0; this.burnDmg=0;
     // 走位随机：不都贴中线（Boss 体型大走中间）
+    // 选路线：Boss 走主线；其余在多线间轮流分流
+    if(G){ if(type==='boss') this.route=G.routes[0];
+      else { G._ri=((G._ri|0)+1); this.route=G.routes[G._ri%G.routes.length]; } }
     this.lane0 = type==='boss' ? 0 : (Math.random()*2-1)*16;
     this.lph = Math.random()*6.28; this.lw = 0.5+Math.random();
     if(type==='boss'){ this.sumT=6; this.blinkT=5; }     // 召唤 / 短距穿越计时
@@ -364,22 +411,31 @@ class Enemy{
     if(this.slowT>0){ this.slowT-=dt; if(this.slowT<=0)this.slowF=1; }
     if(this.burnT>0){ this.burnT-=dt; this.hp-=this.burnDmg*dt; if(this.hp<=0){this.dead=true;return;} }
     // Boss：定时召唤帮手 + 概率短距离穿越
-    if(this.type==='boss' && !this.blocker){
+    if(this.type==='boss'){
+      // 召唤与穿越：即使正被士兵拦住也能发动
       this.sumT-=dt;
       if(this.sumT<=0){ this.sumT=7;
         const kinds=['grunt','runner','grunt'];
         for(let i=0;i<3;i++){ const e=new Enemy(kinds[i],G.curHpMul);
-          e.dist=Math.max(0,this.dist-18-i*10); G.pendingEnemies.push(e); }
+          e.route=this.route; e.dist=Math.max(0,this.dist-18-i*10); G.pendingEnemies.push(e); }
         flash('⚠ 魔王召唤了帮手！');
       }
       this.blinkT-=dt;
       if(this.blinkT<=0){ this.blinkT=5;
-        if(Math.random()<0.5){ this.dist+=70; flash('⚠ 魔王短距穿越！'); } }
+        if(Math.random()<0.6){
+          this.dist+=80;
+          if(this.blocker){                          // 穿越挣脱士兵拦截
+            if(this.blocker.target===this) this.blocker.target=null;
+            this.blocker=null;
+          }
+          flash('⚠ 魔王穿越！挣脱了拦截');
+        } }
     }
     if(this.blocker && !this.blocker.dead) return;        // 被士兵拦住，不前进
     if(this.blocker && this.blocker.dead) this.blocker=null;
     this.dist+=this.speed*this.slowF*dt;
-    const p=pointAt(G.path,this.dist), p2=pointAt(G.path,this.dist+6);
+    const RT=this.route||G.path;
+    const p=pointAt(RT,this.dist), p2=pointAt(RT,this.dist+6);
     let vx=p2.x-p.x, vy=p2.y-p.y; const L=Math.hypot(vx,vy)||1;
     const nx=-vy/L, ny=vx/L;
     const lane=this.lane0 + Math.sin(performance.now()/1000*this.lw+this.lph)*4;
@@ -404,12 +460,14 @@ class Tower{
   get kind(){ return this.def.kind; }
   _apply(){ this.S=this.def.tiers[this.tier-1]; }
   hasPerk(k){ return !!this.perks[k]; }
-  _rally(){ // 路径上离塔最近的点
-    let bd=1e9,bx=this.x,by=this.y, tot=pathLen(G.path);
-    for(let d=0;d<tot;d+=14){ const p=pointAt(G.path,d); const dd=dist(p.x,p.y,this.x,this.y);
-      if(dd<bd){bd=dd;bx=p.x;by=p.y;} }
+  _rally(){ // 离塔最近的「任意路线」上的点
+    let bd=1e9,bx=this.x,by=this.y;
+    for(const rt of (G.routes||[G.path])){ const tot=pathLen(rt);
+      for(let d=0;d<tot;d+=14){ const p=pointAt(rt,d); const dd=dist(p.x,p.y,this.x,this.y);
+        if(dd<bd){bd=dd;bx=p.x;by=p.y;} } }
     return {x:bx,y:by}; }
-  upCost(){ return Math.round(this.def.cost*1.5); }   // 升级费用 = 自身造价的 150%
+  upCost(){ const L2=Math.round(this.def.cost*0.8);    // 升 2 级价
+            return this.tier===1 ? L2 : Math.round(L2*1.5); }  // 升 3 级价 = 2 级价 ×1.5
   sellVal(){ return Math.round(this.def.cost*0.5 + this.def.cost*0.45*(this.tier-1)); }
   upgrade(){ if(this.tier>=3) return; this.tier++; this._apply();
     if(this.kind==='ammo') this.ammo=Math.min(this.ammo,this.S.ammoMax);
@@ -507,14 +565,14 @@ class Shot{
 /* ---------- 关卡控制 ---------- */
 function startGame(mi){
   const M=MAPS[mi];
-  const sp=genSpace(M.path);
-  G={ mi, M, path:M.path, pads:genPads(M.path), gold:120, lives:M.lives,
-      mines:mineCount(), waveIdx:0, totalWaves:M.waves.length,
+  const sp=genSpace(M.routes);
+  G={ mi, M, routes:M.routes, path:M.routes[0], pads:genPads(M.routes, mi), gold:120, lives:M.lives,
+      mines:mineCount(), waveIdx:0, totalWaves:M.waves.length, _ri:0,
       enemies:[], pendingEnemies:[], towers:[], shots:[], blasts:[], zones:[], phase:'prep', spawnQ:[], spawnT:0,
       running:true, started:false, autoIn:0, stars:sp.stars, planets:sp.planets };
   startMusic();
   selectedBuild=null; selectedTower=null; speed=1; $('speedbtn').textContent='▶ 1x';
-  hideOverlays(); buildTowerList(); refreshHUD(); updateWaveBtn(); renderSel();
+  hideOverlays(); closeBuildMenu(); buildTowerList(); refreshHUD(); updateWaveBtn(); renderSel();
 }
 function buildSpawnQueue(w){ const q=[]; for(const g of w.groups) for(let i=0;i<g.n;i++) q.push({t:g.t,delay:g.gap}); return q; }
 function launchWave(){
@@ -599,11 +657,13 @@ function draw(){
     ctx.fillStyle=rg; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
     ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1; ctx.stroke();
   } }
-  // 路
-  ctx.strokeStyle='#3a3322'; ctx.lineWidth=60; ctx.lineJoin='round'; ctx.lineCap='round';
-  ctx.beginPath(); ctx.moveTo(G.path[0][0],G.path[0][1]);
-  for(let i=1;i<G.path.length;i++) ctx.lineTo(G.path[i][0],G.path[i][1]); ctx.stroke();
-  ctx.strokeStyle='#4a4030'; ctx.lineWidth=36; ctx.stroke();
+  // 路（可能多条：分叉/汇合）
+  ctx.lineJoin='round'; ctx.lineCap='round';
+  for(const pass of [{w:60,c:'#3a3322'},{w:36,c:'#4a4030'}]){
+    ctx.strokeStyle=pass.c; ctx.lineWidth=pass.w;
+    for(const rt of G.routes){ ctx.beginPath(); ctx.moveTo(rt[0][0],rt[0][1]);
+      for(let i=1;i<rt.length;i++) ctx.lineTo(rt[i][0],rt[i][1]); ctx.stroke(); }
+  }
   const ep=G.path[G.path.length-1];
   ctx.fillStyle='#ff6b6b'; ctx.beginPath(); ctx.arc(ep[0],ep[1],18,0,7); ctx.fill();
   ctx.fillStyle='#fff'; ctx.font='12px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
@@ -684,16 +744,36 @@ function toGame(e){ const b=cv.getBoundingClientRect();
   return { x:(e.clientX-b.left)*(GW/b.width), y:(e.clientY-b.top)*(GH/b.height) }; }
 function handleTap(mx,my){
   if(!G||G.phase==='done') return;
-  if(selectedBuild){
-    let np=null,bd=24; for(const p of G.pads){ if(p.tower)continue; const d=dist(mx,my,p.x,p.y); if(d<bd){bd=d;np=p;} }
-    if(!np){ flash('请点路边的建造位'); return; }
-    const cost=TOWERS[selectedBuild].cost;
-    if(G.gold<cost){ flash('金币不足，需要 '+cost); return; }
-    G.gold-=cost; G.towers.push(new Tower(selectedBuild,np)); refreshHUD(); return;
-  }
-  let pick=null,bd=24; for(const t of G.towers){ const d=dist(mx,my,t.x,t.y); if(d<bd){bd=d;pick=t;} }
-  selectedTower=pick; renderSel();
+  closeBuildMenu();
+  const TOL=(typeof PLAT!=='undefined'?PLAT.tap:24);
+  // 已建的塔优先（点它=升级面板）
+  let pick=null,bt=TOL; for(const t of G.towers){ const d=dist(mx,my,t.x,t.y); if(d<bt){bt=d;pick=t;} }
+  if(pick){ selectedTower=pick; renderSel(); return; }
+  // 空建造位 → 在它旁边弹出建造菜单
+  let np=null,bp=TOL; for(const p of G.pads){ if(p.tower)continue; const d=dist(mx,my,p.x,p.y); if(d<bp){bp=d;np=p;} }
+  if(np){ selectedTower=null; renderSel(); openBuildMenu(np); return; }
+  // 点空白：收起
+  selectedTower=null; renderSel();
 }
+function openBuildMenu(pad){
+  const el=$('buildMenu'); el.innerHTML=''; G._buildPad=pad;
+  for(const k of TKEYS){ const d=TOWERS[k], aff=G.gold>=d.cost;
+    const b=document.createElement('div'); b.className='bm'+(aff?'':' dis');
+    const ic=document.createElement('canvas'); ic.width=30; ic.height=30;
+    const g=ic.getContext('2d'); g.translate(15,15); towerArt(g,k,1,11,d.color,false);
+    b.appendChild(ic);
+    const nm=document.createElement('div'); nm.className='nm'; nm.textContent=d.tiers[0].name; b.appendChild(nm);
+    const ct=document.createElement('div'); ct.className='ct'; ct.textContent=d.cost+'金'; b.appendChild(ct);
+    b.onclick=()=>{ if(G.gold<d.cost){ flash('金币不足，需要 '+d.cost+' 金'); return; }
+      if(pad.tower){ closeBuildMenu(); return; }
+      G.gold-=d.cost; const tw=new Tower(k,pad); G.towers.push(tw);
+      closeBuildMenu(); selectedTower=tw; renderSel(); refreshHUD(); };
+    el.appendChild(b);
+  }
+  el.style.left=pad.x+'px'; el.style.top=(pad.y-16)+'px';
+  el.classList.add('on');
+}
+function closeBuildMenu(){ const el=$('buildMenu'); if(el){ el.classList.remove('on'); el.innerHTML=''; } if(G) G._buildPad=null; }
 let _pDown=null;
 cv.addEventListener('pointermove',e=>{ const p=toGame(e); mouse.x=p.x; mouse.y=p.y; }, {passive:true});
 cv.addEventListener('pointerdown',e=>{ e.preventDefault(); const p=toGame(e);
@@ -740,9 +820,9 @@ function perkBlockHTML(t){
   return h;
 }
 function renderSel(){
-  const p=$('selPanel'); if(!selectedTower){ p.style.display='none'; return; }
+  const p=$('topPanel'); if(!selectedTower){ p.style.display='none'; p.innerHTML=''; return; }
   const t=selectedTower, d=t.def, S=t.S; p.style.display='block';
-  let body=`<div style="font-size:14px;font-weight:bold;color:${d.color}">${S.name} · Lv${t.tier}${S.evo?' ✦':''}</div>`;
+  let body=`<button id="pClose">×</button><div style="font-size:14px;font-weight:bold;color:${d.color}">${S.name} · Lv${t.tier}${S.evo?' ✦':''}</div>`;
   if(t.kind==='ammo'){
     const refill=S.ammoMax-t.ammo, rc=refill*S.ammoCost;
     body+=`<div class="stat">伤害 ${S.dmg} · 射程 ${Math.round(S.range)}<br>弹药 ${Math.round(t.ammo)}/${S.ammoMax} · 单发 ${S.ammoCost}金</div>
@@ -775,6 +855,7 @@ function renderSel(){
         G.gold-=pc; t.perks[pk.key]=true; flash('获得特性：'+pk.name); refreshHUD(); renderSel(); }; } }
   $('bSell').onclick=()=>{ G.gold+=t.sellVal(); t.pad.tower=null;
     G.towers=G.towers.filter(x=>x!==t); selectedTower=null; refreshHUD(); renderSel(); };
+  if($('pClose')) $('pClose').onclick=()=>{ selectedTower=null; renderSel(); };
 }
 function refreshHUD(){ if(!G) return;
   $('hGold').textContent=Math.floor(G.gold); $('hLife').textContent=G.lives;
