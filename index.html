@@ -88,6 +88,11 @@
     border:1px solid #344256; color:#cfe; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; }
   #musicbtn { position:absolute; top:46px; left:12px; z-index:10; background:rgba(20,26,34,.85);
     border:1px solid #344256; color:#cfe; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; }
+  #pausebtn { position:absolute; top:80px; left:12px; z-index:10; background:rgba(20,26,34,.85);
+    border:1px solid #344256; color:#cfe; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; }
+  #menubtn { position:absolute; top:114px; left:12px; z-index:10; background:rgba(20,26,34,.85);
+    border:1px solid #344256; color:#cfe; padding:6px 12px; border-radius:8px; font-size:12px; cursor:pointer; }
+  body.touch #pausebtn{ top:88px; } body.touch #menubtn{ top:128px; }
   /* 建造位弹出菜单（出现在该建造位旁边） */
   #buildMenu { position:absolute; display:none; z-index:14; transform:translate(-50%,-115%);
     background:rgba(18,24,32,.96); border:1px solid #3a4658; border-radius:10px;
@@ -157,6 +162,8 @@
     <canvas id="cv" width="960" height="620"></canvas>
     <button id="speedbtn">▶ 1x</button>
     <button id="musicbtn">♪ 音乐</button>
+    <button id="pausebtn">⏸ 暂停</button>
+    <button id="menubtn">≡ 主菜单</button>
     <div id="msg"></div>
     <div id="buildMenu"></div>
     <div id="topPanel"></div>
@@ -235,6 +242,7 @@ const GW=960, GH=620;
 const GOLD_PER_MINE=4;          // 每个矿每秒产出金币（比原版 5 慢，但保留早期可玩性）
 const AUTO_DELAY=14;            // 上一波清除后，下一波自动来袭的倒计时（秒）
 const LEVELS=18;                // 关卡总数（7 张手作 + 其余程序生成）
+const SMOOTH=true;              // 道路平滑（向心 Catmull-Rom）；false 回到直角折线
 const $=id=>document.getElementById(id);
 function dist(ax,ay,bx,by){ return Math.hypot(ax-bx,ay-by); }
 function lerp(a,b,t){ return a+(b-a)*t; }
@@ -357,7 +365,7 @@ function wavesFor(mi){
 }
 MAPS.forEach((m,i)=>m.waves=wavesFor(i));
 // 统一：单线地图也包成 routes；m.path = 主线（兼容旧引用）
-MAPS.forEach(m=>{ if(!m.routes) m.routes=[m.path]; m.path=m.routes[0]; });
+MAPS.forEach(m=>{ if(!m.routes) m.routes=[m.path]; m.routes=m.routes.map(smoothPath); m.path=m.routes[0]; });
 
 /* ---------- 战役故事线：18 章（宇宙空间命名 + 剧情） ---------- */
 const SAGA=[
@@ -401,6 +409,28 @@ const CODEX={
 
 /* ---------- 路径与建造位 ---------- */
 function pathLen(p){ let L=0; for(let i=1;i<p.length;i++) L+=dist(p[i-1][0],p[i-1][1],p[i][0],p[i][1]); return L; }
+function _lp(a,b,t){ return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t]; }
+// 向心 Catmull-Rom：把路点细分成平滑折线（端点精确保留 → 分叉起终点不偏移）
+function smoothPath(pts){
+  if(!SMOOTH || !pts || pts.length<3) return pts;
+  const P=pts.map(p=>[p[0],p[1]]);
+  const A=[2*P[0][0]-P[1][0], 2*P[0][1]-P[1][1]];
+  const Z=[2*P[P.length-1][0]-P[P.length-2][0], 2*P[P.length-1][1]-P[P.length-2][1]];
+  const Q=[A,...P,Z], out=[[P[0][0],P[0][1]]], STEP=14;
+  const kn=(ti,a,b)=>ti+Math.pow(Math.hypot(b[0]-a[0],b[1]-a[1])||1e-4,0.5);
+  for(let i=1;i<Q.length-2;i++){
+    const p0=Q[i-1],p1=Q[i],p2=Q[i+1],p3=Q[i+2];
+    const t0=0,t1=kn(t0,p0,p1),t2=kn(t1,p1,p2),t3=kn(t2,p2,p3);
+    for(let s=1;s<=STEP;s++){
+      const t=t1+(t2-t1)*(s/STEP);
+      const a1=_lp(p0,p1,(t-t0)/(t1-t0)), a2=_lp(p1,p2,(t-t1)/(t2-t1)), a3=_lp(p2,p3,(t-t2)/(t3-t2));
+      const b1=_lp(a1,a2,(t-t0)/(t2-t0)), b2=_lp(a2,a3,(t-t1)/(t3-t1));
+      out.push(_lp(b1,b2,(t-t1)/(t2-t1)));
+    }
+  }
+  out[out.length-1]=[P[P.length-1][0],P[P.length-1][1]];
+  return out;
+}
 function pointAt(p,d){
   for(let i=1;i<p.length;i++){ const s=dist(p[i-1][0],p[i-1][1],p[i][0],p[i][1]);
     if(d<=s){ const t=s?d/s:0; return {x:lerp(p[i-1][0],p[i][0],t), y:lerp(p[i-1][1],p[i][1],t), done:false}; }
@@ -525,6 +555,7 @@ function enemyArt(g,e){
 
 /* ---------- 实体 ---------- */
 let G=null, speed=1, selectedBuild=null, selectedTower=null, mouse={x:-99,y:-99};
+let paused=false, rallySetFor=null;
 
 class Enemy{
   constructor(type,hpMul){ const d=ENEMIES[type]; this.type=type; this.def=d;
@@ -708,7 +739,8 @@ function startGame(mi){
       enemies:[], pendingEnemies:[], towers:[], shots:[], blasts:[], zones:[], phase:'prep', spawnQ:[], spawnT:0,
       running:true, started:false, autoIn:0, stars:sp.stars, planets:sp.planets };
   startMusic();
-  selectedBuild=null; selectedTower=null; speed=1; $('speedbtn').textContent='▶ 1x';
+  selectedBuild=null; selectedTower=null; speed=1; paused=false; rallySetFor=null;
+  $('speedbtn').textContent='▶ 1x'; if($('pausebtn')) $('pausebtn').textContent='⏸ 暂停';
   hideOverlays(); closeBuildMenu(); buildTowerList(); refreshHUD(); updateWaveBtn(); renderSel();
 }
 function buildSpawnQueue(w){ const q=[]; for(const g of w.groups) for(let i=0;i<g.n;i++) q.push({t:g.t,delay:g.gap}); return q; }
@@ -740,7 +772,7 @@ function endGame(win){
 /* ---------- 主循环 ---------- */
 let last=performance.now();
 function loop(now){ let dt=(now-last)/1000; last=now; dt=Math.min(dt,0.05);
-  if(G&&G.running&&G.phase!=='done'){ for(let s=0;s<speed;s++) step(dt); }
+  if(G&&G.running&&!paused&&G.phase!=='done'){ for(let s=0;s<speed;s++) step(dt); }
   draw(); requestAnimationFrame(loop); }
 function step(dt){
   if(G.started) G.gold += G.mines*GOLD_PER_MINE*dt;     // 开战后矿才产金
@@ -841,6 +873,17 @@ function draw(){
       ctx.fillStyle=t.wp<=0?'#c14b4b':'#8ad6a0'; ctx.fillRect(bx,by,w*(t.wp/t.S.wpMax),4);
       if(t.wp<=0){ ctx.fillStyle='#ff6b6b'; ctx.font='10px sans-serif'; ctx.textAlign='center'; ctx.fillText('武器损坏',t.x,t.y-26); } }
   }
+  // 集结点（选中兵营或正在设置时显示旗帜 + 范围）
+  const rallyT = rallySetFor || (selectedTower&&selectedTower.kind==='weapon'?selectedTower:null);
+  if(rallyT && rallyT.rally){
+    if(rallySetFor===rallyT){ ctx.beginPath(); ctx.strokeStyle='rgba(138,214,160,.5)';
+      ctx.setLineDash([6,5]); ctx.arc(rallyT.x,rallyT.y,rallyT.S.range,0,7); ctx.stroke(); ctx.setLineDash([]); }
+    const rx=rallyT.rally.x, ry=rallyT.rally.y;
+    ctx.strokeStyle='rgba(138,214,160,.4)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(rallyT.x,rallyT.y); ctx.lineTo(rx,ry); ctx.stroke();
+    ctx.strokeStyle='#6f5b3a'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(rx,ry+8); ctx.lineTo(rx,ry-12); ctx.stroke();
+    ctx.fillStyle='#8ad6a0'; ctx.beginPath(); ctx.moveTo(rx,ry-12); ctx.lineTo(rx+13,ry-8); ctx.lineTo(rx,ry-4); ctx.closePath(); ctx.fill();
+  }
   // 士兵
   for(const t of G.towers){ if(t.kind!=='weapon') continue;
     for(const s of t.soldiers){ ctx.fillStyle='#d8c98a'; ctx.strokeStyle='#10151c'; ctx.lineWidth=1.5;
@@ -882,6 +925,12 @@ function toGame(e){ const b=cv.getBoundingClientRect();
 function handleTap(mx,my){
   if(!G||G.phase==='done') return;
   closeBuildMenu();
+  // 设置兵营集结点：点地图放置（限制在塔射程内）
+  if(rallySetFor){ const t=rallySetFor; let dx=mx-t.x, dy=my-t.y;
+    const dd=Math.hypot(dx,dy), R=t.S.range;
+    if(dd>R){ dx=dx/dd*R; dy=dy/dd*R; }
+    t.rally={x:t.x+dx, y:t.y+dy}; t.rallyUser=true;
+    rallySetFor=null; flash('集结点已设定'); renderSel(); return; }
   const TOL=(typeof PLAT!=='undefined'?PLAT.tap:24);
   // 已建的塔优先（点它=升级面板）
   let pick=null,bt=TOL; for(const t of G.towers){ const d=dist(mx,my,t.x,t.y); if(d<bt){bt=d;pick=t;} }
@@ -971,7 +1020,8 @@ function renderSel(){
     const rep=Math.ceil((S.wpMax-t.wp)*S.repair), alive=t.soldiers.length;
     body+=`<div class="stat">士兵 ${alive}/${S.count} · 单兵 ${S.sDmg}伤/${S.sHp}血<br>武器耐久 ${Math.round(t.wp)}/${S.wpMax}（损耗后伤害骤降）</div>
       <div class="bar"><i style="width:${t.wp/S.wpMax*100}%;background:${t.wp<=0?'#c14b4b':'#8ad6a0'}"></i></div>
-      <div class="row"><button class="bAmmo" id="bWp">修武器 (${rep} 金)</button></div>
+      <div class="row"><button class="bAmmo" id="bWp">修武器 (${rep} 金)</button>
+        <button class="bUp" id="bRally">📍 ${rallySetFor===t?'点地图放置…':'设置集结点'}</button></div>
       ${perkBlockHTML(t)}
       <div class="row"><button class="bSell" id="bSell">出售 (+${t.sellVal()})</button></div>`;
   }
@@ -982,6 +1032,8 @@ function renderSel(){
   if($('bWp')) $('bWp').onclick=()=>{ const need=S.wpMax-t.wp; if(need<=0){flash('武器完好');return;}
     const cost=Math.ceil(need*S.repair); if(G.gold<cost){flash('金币不足');return;}
     t.wp=S.wpMax; G.gold-=cost; refreshHUD(); renderSel(); };
+  if($('bRally')) $('bRally').onclick=()=>{ rallySetFor = rallySetFor===t?null:t;
+    flash(rallySetFor?'点地图上的位置放置集结点（范围内）':'已取消'); renderSel(); };
   if($('bUp')) $('bUp').onclick=()=>{ if(t.tier>=3)return; const c=t.upCost();
     if(G.gold<c){flash('金币不足，需要 '+c+' 金');return;}
     G.gold-=c; t.upgrade(); flash('已升级为 '+t.S.name+'！'); refreshHUD(); renderSel(); };
@@ -1012,6 +1064,9 @@ $('supplyAll').onclick=()=>{ if(!G) return; let spent=0;
       if(G.gold>=c){ t.wp=t.S.wpMax; G.gold-=c; spent+=c; } } }
   refreshHUD(); renderSel(); flash(spent?('全部补给 -'+spent+' 金'):'无需补给或金币不足'); };
 $('speedbtn').onclick=()=>{ speed=speed===1?2:speed===2?3:1; $('speedbtn').textContent='▶ '+speed+'x'; };
+$('pausebtn').onclick=()=>{ paused=!paused; $('pausebtn').textContent=paused?'▶ 继续':'⏸ 暂停'; flash(paused?'已暂停':'继续'); };
+$('menubtn').onclick=()=>{ if(G) G.running=false; paused=false; rallySetFor=null; selectedTower=null;
+  closeBuildMenu(); renderSel(); hideOverlays(); $('ovMenu').style.display='flex'; };
 
 /* ---------- 背景音乐（程序生成，无需外部文件） ---------- */
 let AC=null, musicTimer=null, _mbus=null, _mdrone=null;
