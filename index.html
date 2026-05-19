@@ -6,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Lost in Space">
+<meta name="apple-mobile-web-app-title" content="Space Hunters">
 <meta name="theme-color" content="#14181f">
 <meta name="format-detection" content="telephone=no">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Lost in Space</title>
+<title>Space Hunters</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0;
     -webkit-tap-highlight-color:transparent; -webkit-touch-callout:none; }
@@ -115,6 +115,39 @@
   .bUp{background:#3a7d44;} .bAmmo{background:#b08018;} .bSell{background:#8a3a3a;}
   #pClose { position:absolute; right:7px; top:5px; background:none; border:none; color:#8b97a8;
     font-size:16px; cursor:pointer; padding:2px 5px; }
+  /* LOGO */
+  #logo { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  #logo .word { font-size:54px; font-weight:900; letter-spacing:6px;
+    background:linear-gradient(180deg,#fff,#f5c451 60%,#c97a2a);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 26px rgba(245,196,81,.35); }
+  #logo .sub { font-size:14px; color:#9fb0c4; letter-spacing:4px; }
+  /* 图鉴 */
+  #ovCodex { justify-content:flex-start; padding-top:26px; }
+  #codexBody { width:min(860px,92vw); max-height:64vh; overflow-y:auto; display:grid;
+    grid-template-columns:1fr 1fr; gap:10px; padding:4px 8px; }
+  .cdx { background:#1d2531; border:1px solid #303b4b; border-radius:9px; padding:9px 11px;
+    display:flex; gap:10px; text-align:left; }
+  .cdx canvas { flex:none; }
+  .cdx h4 { font-size:14px; margin-bottom:2px; }
+  .cdx .role { font-size:11px; color:#f5c451; margin-bottom:4px; }
+  .cdx p { font-size:11.5px; color:#9fb0c4; line-height:1.55; max-width:none; }
+  .cdx.en h4 { color:#ff8e8e; } .cdx.tw h4 { color:#6cc6ff; }
+  body.touch #codexBody { grid-template-columns:1fr; }
+  /* 剧情滚动（星战式） */
+  #ovStory { background:#000; padding:0; overflow:hidden; }
+  #crawlWrap { position:absolute; inset:0; display:flex; justify-content:center;
+    perspective:340px; overflow:hidden; }
+  #crawl { position:absolute; top:100%; width:min(780px,86vw); color:#f5c451;
+    text-align:center; transform:rotateX(26deg); transform-origin:50% 100%;
+    font-weight:800; line-height:1.7; text-shadow:0 0 18px rgba(245,196,81,.35);
+    animation:crawl 30s linear forwards; }
+  #crawl .ttl { font-size:34px; font-weight:900; letter-spacing:3px; margin-bottom:18px; color:#fff; }
+  #crawl p { font-size:23px; margin:0 0 16px; }
+  @keyframes crawl { 0%{ top:100%; } 100%{ top:-160%; } }
+  #storySkip { position:absolute; right:16px; bottom:14px; z-index:3;
+    background:rgba(20,26,34,.85); border:1px solid #344256; color:#cfe;
+    padding:8px 16px; border-radius:8px; font-size:13px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -143,12 +176,24 @@
     </div>
 
     <div class="overlay" id="ovMenu">
-      <h1>Lost in Space<small>弹药与矿场 · 太空塔防</small></h1>
-      <p>每座防御塔都需要<b style="color:#f5c451">弹药</b>才能开火。弹药与升级都要花<b style="color:#f5c451">金币</b>，
-         而金币来自你的<b style="color:#8ad6a0">矿</b>——矿不靠打怪获得，<b>每通关一个新关卡才 +1 矿</b>，初始 2 矿，越往后越富。
-         兵营的士兵不耗弹药，但手里的武器会越用越破。</p>
-      <button class="bigbtn" id="toMapSel">开始战役</button>
-      <p class="hint">7 个关卡 · 进度自动存档 · 可加速</p>
+      <div id="logo">
+        <svg viewBox="0 0 120 120" width="96" height="96" aria-hidden="true">
+          <circle cx="60" cy="60" r="40" fill="none" stroke="#f5c451" stroke-width="4"/>
+          <path d="M60 8 V30 M60 90 V112 M8 60 H30 M90 60 H112" stroke="#f5c451" stroke-width="4" stroke-linecap="round"/>
+          <circle cx="60" cy="60" r="6" fill="#ff6b6b"/>
+          <path d="M60 38 L66 56 L60 50 L54 56 Z" fill="#6cc6ff"/>
+        </svg>
+        <div class="word">SPACE&nbsp;HUNTERS</div>
+        <div class="sub">赏金猎人 · 太空塔防</div>
+      </div>
+      <p>你是星海赏金猎人。古老的<b style="color:#c95bff">虚蚀虫群</b>正吞没一个个殖民星系。
+         循着矿脉与战鼓，从家园星带一路追猎到<b style="color:#f5c451">终末之门</b>——
+         每座炮塔都要<b style="color:#f5c451">弹药</b>，金币来自<b style="color:#8ad6a0">矿场</b>（每通一关 +1 矿）。</p>
+      <div style="display:flex;gap:14px">
+        <button class="bigbtn" id="toMapSel">开始战役</button>
+        <button class="bigbtn ghost" style="background:#2a3340" id="toCodex">角色图鉴</button>
+      </div>
+      <p class="hint">18 关剧情战役 · 进度自动存档 · 点左上「♪」开战鼓</p>
     </div>
 
     <div class="overlay" id="ovMap" style="display:none">
@@ -168,6 +213,17 @@
         <button class="bigbtn ghost" style="background:#2a3340" id="retryBtn">重玩本关</button>
         <button class="bigbtn ghost" style="background:#2a3340" id="mapBtn">关卡列表</button>
       </div>
+    </div>
+
+    <div class="overlay" id="ovCodex" style="display:none">
+      <h1 style="font-size:24px">角色图鉴 <small style="font-size:12px;color:#8b97a8">SPACE HUNTERS CODEX</small></h1>
+      <div id="codexBody"></div>
+      <button class="ghost act" style="width:auto;padding:8px 20px" id="codexBack">返回</button>
+    </div>
+
+    <div class="overlay" id="ovStory" style="display:none">
+      <div id="crawlWrap"><div id="crawl"></div></div>
+      <button id="storySkip">跳过 ▶</button>
     </div>
   </div>
 </div>
@@ -303,6 +359,46 @@ MAPS.forEach((m,i)=>m.waves=wavesFor(i));
 // 统一：单线地图也包成 routes；m.path = 主线（兼容旧引用）
 MAPS.forEach(m=>{ if(!m.routes) m.routes=[m.path]; m.path=m.routes[0]; });
 
+/* ---------- 战役故事线：18 章（宇宙空间命名 + 剧情） ---------- */
+const SAGA=[
+ {name:'晨曦矿带',  s:'纪元 3187。虚蚀虫群从星海深处苏醒，啃食着一个个殖民星系。\n赏金猎人公会在家园「晨曦矿带」拉响警报——猎杀，从这里开始。'},
+ {name:'锈红环带',  s:'虫群顺着废弃采矿环带涌来。\n猎人们架起第一道炮线，用矿脉的金币换取每一发弹药。'},
+ {name:'双生峡湾',  s:'峡湾在此分作双流，虫群兵分两路。\n守住两条航道，否则家园的灯火将一同熄灭。'},
+ {name:'寂静电离层',s:'电离风暴遮蔽了所有信号。\n在死寂中，只有战鼓与炮火指引方向。'},
+ {name:'蜿蜒星河',  s:'沿着蜿蜒的离子河追击，虫群再度分流。\n猎人深入无人区，矿脉愈发珍贵。'},
+ {name:'熔火星核',  s:'一颗濒死恒星的核心，热浪扭曲了空间。\n虫群在此孵化，必须在它们成群前清剿。'},
+ {name:'残响回廊',  s:'古老飞船的残骸组成回廊，回荡着失落文明的低语。\n猎人拾起线索：虫群的源头，在更深的虚空。'},
+ {name:'幽暗星带',  s:'光无法抵达之地。猎人凭矿脉的微光与战鼓前行，\n虫潮一波猛过一波。'},
+ {name:'陨石走廊',  s:'破碎行星化作致命走廊。\n每一处建造位都来之不易，算准每一枚炮弹。'},
+ {name:'环带禁区',  s:'被公会标记为禁区的死亡环带，双线并涌。\n传言深处藏着虫群的「巢导体」。'},
+ {name:'虚空裂隙',  s:'空间在此撕开裂隙，虫群从裂缝中倾泻。\n猎人逼近虫巢的外围防线。'},
+ {name:'红巨星轨', s:'垂死的红巨星照亮战场。\n虫群的精锐——重甲与飞行体——倾巢而出。'},
+ {name:'寒冰光环',  s:'冰封星环下，魔王的低语第一次清晰传来。\n它在召唤，也在等待。'},
+ {name:'离子风暴',  s:'狂暴的离子风暴中，双线虫潮几乎不留喘息。\n坚持住，源头已近。'},
+ {name:'黑洞边境',  s:'引力edge将一切吞没。猎人在黑洞边境立下最后的矿场，\n背水一战。'},
+ {name:'遗迹星系',  s:'湮灭文明的遗迹群——虫群的孵化母巢就藏于此。\n清剿巢穴，斩断虫潮之源。'},
+ {name:'双子星阱', s:'双子星的引力陷阱，虫群与魔王的卫队双线合击。\n终末之门已在眼前。'},
+ {name:'终末之门',  s:'虚蚀魔王盘踞于终末之门之后。\n星海赏金猎人最后的猎杀——为了所有殖民星系的灯火。'},
+];
+MAPS.forEach((m,i)=>{ if(SAGA[i]){ m.name=SAGA[i].name; m.story=SAGA[i].s; } });
+
+/* ---------- 角色图鉴（背景设定） ---------- */
+const CODEX={
+  towers:{
+    arrow:'晨曦矿带的猎人最先掌握的速射弓弩塔。便宜、攻速快，三级进化为「狙击塔」，可远距点杀。特性：致命一击 / 贯穿箭。',
+    mage:'公会从遗迹文明逆向出的能量法塔，伤害无视护甲。三级进化「冰霜塔」可冻缓虫群。特性：寒冰连锁 / 碎冰打击。',
+    cannon:'矿工改装的重型轨道炮，范围溅射，专治成群虫潮。三级进化「火焰塔」附带灼烧。一级最均衡，二三级威力被公会限流。特性：燃油弹 / 巨型弹。',
+    barracks:'赏金猎人本部派出的肉身防线。士兵不耗弹药，但武器会越打越钝，需返厂更换。三级「骑士堡」披重甲。特性：战地医疗 / 荆棘铠甲。',
+  },
+  enemies:{
+    grunt:'虚蚀工虫。最常见的虫群单位，成群结队，被虚空腐蚀的躯壳仍有薄甲。',
+    runner:'蚀奔者。退化出极速的虫体，血薄却能瞬间冲过防线，专挑空档。',
+    armor:'蚀甲虫。厚重的几丁质装甲让物理炮火收效甚微，需法术或狙击破防。',
+    flyer:'蚀翼体。低空掠行，只有可对空的塔能触及，绕过一切地面拦截。',
+    boss:'虚蚀魔王。虫群的母体意志。会召唤帮手，并能短距「穿越」——即便被士兵缠住也能挣脱。终末之门的最后猎物。',
+  }
+};
+
 /* ---------- 路径与建造位 ---------- */
 function pathLen(p){ let L=0; for(let i=1;i<p.length;i++) L+=dist(p[i-1][0],p[i-1][1],p[i][0],p[i][1]); return L; }
 function pointAt(p,d){
@@ -320,27 +416,36 @@ function minPathDist(px,py,p){ let m=1e9; for(let i=1;i<p.length;i++) m=Math.min
 function minRoutesDist(px,py,routes){ let m=1e9; for(const p of routes){ const v=minPathDist(px,py,p); if(v<m)m=v; } return m; }
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
   t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
-// 沿每条路边生成建造位：间距不均匀（有集中簇、有稀疏段），多线 => 自动更多塔位
+// 建造位数量控制：
+//   目标数 = clamp( 路网总长 / SPACING , MIN , MAX )
+//   SPACING≈每多少像素路给 1 个塔位（越大→塔位越少）；按各路线长度比例分配；
+//   位置非均匀（有簇有疏），分叉关也不会爆量（封顶 MAX）。
+const PAD_SPACING=240, PAD_MIN=8, PAD_MAX=15;
 function genPads(routes, seed){
   const rnd=mulberry32(((seed|0)+1)*99991), pads=[];
-  for(const path of routes){
-    const total=pathLen(path);
-    let d = 50 + rnd()*70;
-    while(d < total-36){
-      const cluster = rnd()<0.32 ? (2 + (rnd()<0.4?1:0)) : 1;   // 偶尔 2~3 个挤在一起
-      for(let c=0;c<cluster;c++){
-        const dd=d+c*32, a=pointAt(path,dd), b=pointAt(path,Math.min(dd+5,total));
-        let nx=-(b.y-a.y), ny=(b.x-a.x); const L=Math.hypot(nx,ny)||1; nx/=L; ny/=L;
-        const off=54 + (rnd()*14-2);
-        for(const s of (rnd()<0.5?[1,-1]:[-1,1])){
-          const px=a.x+nx*off*s, py=a.y+ny*off*s;
-          if(px<24||px>936||py<24||py>596) continue;
-          if(minRoutesDist(px,py,routes)<46) continue;          // 远离任何一条路
-          if(pads.some(q=>dist(q.x,q.y,px,py)<44)) continue;
-          pads.push({x:px,y:py,tower:null}); break;
-        }
+  const lens=routes.map(pathLen), total=lens.reduce((a,b)=>a+b,0);
+  const target=Math.max(PAD_MIN, Math.min(PAD_MAX, Math.round(total/PAD_SPACING)));
+  for(let ri=0;ri<routes.length;ri++){
+    const path=routes[ri], plen=lens[ri];
+    const want=Math.max(2, Math.round(target*plen/total));
+    const avg=plen/(want+1);
+    let placed=0, tries=0, d=avg*(0.45+rnd()*0.4);
+    while(placed<want && tries<want*10 && d<plen-28){
+      tries++;
+      const a=pointAt(path,d), b=pointAt(path,Math.min(d+5,plen));
+      let nx=-(b.y-a.y), ny=(b.x-a.x); const L=Math.hypot(nx,ny)||1; nx/=L; ny/=L;
+      const off=52 + (rnd()*16-2);
+      let put=false;
+      for(const s of (rnd()<0.5?[1,-1]:[-1,1])){
+        const px=a.x+nx*off*s, py=a.y+ny*off*s;
+        if(px<24||px>936||py<24||py>596) continue;
+        if(minRoutesDist(px,py,routes)<46) continue;            // 远离任何一条路
+        if(pads.some(q=>dist(q.x,q.y,px,py)<54)) continue;       // 塔位之间留间距
+        pads.push({x:px,y:py,tower:null}); placed++; put=true; break;
       }
-      d += (rnd()<0.28 ? 64+rnd()*40 : 150+rnd()*150);          // 密集簇 vs 大间隔
+      // 非均匀步进：约 30% 形成密集簇，其余拉开大间隔
+      d += put ? (rnd()<0.30 ? avg*(0.4+rnd()*0.3) : avg*(0.95+rnd()*0.7))
+               : avg*0.5;
     }
   }
   return pads;
@@ -485,7 +590,7 @@ class Tower{
     this.tier=1; this.cool=0; this.ang=0; this.perks={}; pad.tower=this; this._apply();
     if(this.kind==='ammo') this.ammo=this.S.ammoMax;
     if(this.kind==='weapon'){ this.wp=this.S.wpMax; this.soldiers=[]; this.respawn=[];
-      this.rally=this._rally(); for(let i=0;i<this.S.count;i++) this.soldiers.push(new Soldier(this)); } }
+      this.rally=this._rally(); for(let i=0;i<this.S.count;i++) this.soldiers.push(new Soldier(this)); sfx('deploy'); } }
   get kind(){ return this.def.kind; }
   _apply(){ this.S=this.def.tiers[this.tier-1]; }
   hasPerk(k){ return !!this.perks[k]; }
@@ -495,8 +600,10 @@ class Tower{
       for(let d=0;d<tot;d+=14){ const p=pointAt(rt,d); const dd=dist(p.x,p.y,this.x,this.y);
         if(dd<bd){bd=dd;bx=p.x;by=p.y;} } }
     return {x:bx,y:by}; }
-  upCost(){ const L2=Math.round(this.def.cost*0.8);    // 升 2 级价
-            return this.tier===1 ? L2 : Math.round(L2*1.5); }  // 升 3 级价 = 2 级价 ×1.5
+  // 每次升级单独收费，逐级递增（不是累计总价）：
+  //   升到 2 级花费 = 造价×0.8；升到 3 级花费 = 升2级花费 ×1.5
+  upCost(){ const up2=Math.round(this.def.cost*0.8);
+            return this.tier===1 ? up2 : Math.round(up2*1.5); }
   sellVal(){ return Math.round(this.def.cost*0.5 + this.def.cost*0.45*(this.tier-1)); }
   upgrade(){ if(this.tier>=3) return; this.tier++; this._apply();
     if(this.kind==='ammo') this.ammo=Math.min(this.ammo,this.S.ammoMax);
@@ -512,13 +619,14 @@ class Tower{
       if(e.air&&!this.S.air) continue;
       if(dist(this.x,this.y,e.x,e.y)<=this.S.range && e.dist>best){ best=e.dist; tgt=e; } }
     if(tgt){ this.ang=Math.atan2(tgt.y-this.y,tgt.x-this.x);
-      if(this.cool<=0){ this.cool=this.S.rate; this.ammo--; G.shots.push(new Shot(this,tgt)); } }
+      if(this.cool<=0){ this.cool=this.S.rate; this.ammo--; G.shots.push(new Shot(this,tgt));
+        if(this.key==='arrow') sfx('arrow'); else if(this.key==='mage') sfx('magic'); } }
   }
   _barracks(dt){
     const S=this.S;
     // 重生
     for(let i=this.respawn.length-1;i>=0;i--){ this.respawn[i].t-=dt;
-      if(this.respawn[i].t<=0){ const s=this.respawn[i].s; s.reset(); this.soldiers.push(s); this.respawn.splice(i,1); } }
+      if(this.respawn[i].t<=0){ const s=this.respawn[i].s; s.reset(); this.soldiers.push(s); this.respawn.splice(i,1); sfx('deploy'); } }
     let fighting=0;
     const regen=this.hasPerk('regen'), thorns=this.hasPerk('thorns');
     for(const s of this.soldiers){
@@ -571,7 +679,7 @@ class Shot{
     if(splash>0){ for(const e of G.enemies){ if(e.dead||e.leaked) continue;
         if(dist(this.tgt.x,this.tgt.y,e.x,e.y)<=splash){ e.hit(this.dmg,S.type);
           if(S.burn && !e.dead){ e.burnT=S.burnT; e.burnDmg=S.burn; } } }
-      G.blasts.push({x:this.tgt.x,y:this.tgt.y,r:splash,life:.25,max:.25});
+      G.blasts.push({x:this.tgt.x,y:this.tgt.y,r:splash,life:.25,max:.25}); sfx('boom');
       if(P.hasPerk('napalm')) G.zones.push({x:this.tgt.x,y:this.tgt.y,r:splash*0.9,life:4,max:4,dps:(S.burn||10)}); }
     else {
       let dmg=this.dmg;
@@ -834,7 +942,7 @@ function perkBlockHTML(t){
   if(t.tier<3){
     const evo=t.def.tiers[t.tier].name, c=t.upCost();
     const aff=G.gold>=c?'':' style="opacity:.55"';
-    return `<div class="row"><button class="bUp" id="bUp"${aff}>⬆ 升级 → ${evo}（${c} 金）</button></div>`;
+    return `<div class="row"><button class="bUp" id="bUp"${aff}>⬆ 升至 Lv${t.tier+1} ${evo} · 本次升级价 ${c} 金</button></div>`;
   }
   const pc=Math.round(t.def.cost*2);
   let h=`<div class="stat" style="margin-top:6px;color:#cda6f0">✦ 已进化 · 可强化特性（各 ${pc} 金）</div>`;
@@ -977,17 +1085,91 @@ $('musicbtn').onclick=()=>{ musicOn=!musicOn;
   setMusicBtn();
   if(musicOn) startMusic(); else stopMusic(); };
 setMusicBtn();
+/* ---------- 音效（程序生成，独立于音乐开关） ---------- */
+function ensureAC(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } }
+  if(AC.state==='suspended') AC.resume(); return AC; }
+let _sfxNB=null;
+function sfxNoise(ac){ if(!_sfxNB){ _sfxNB=ac.createBuffer(1,ac.sampleRate*0.4,ac.sampleRate);
+  const d=_sfxNB.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; } return _sfxNB; }
+function sfx(kind){
+  const ac=ensureAC(); if(!ac||ac.state!=='running') return;
+  const t=ac.currentTime, out=ac.createGain(); out.connect(ac.destination);
+  if(kind==='arrow'){ out.gain.value=0.16;
+    const o=ac.createOscillator(),g=ac.createGain(); o.type='triangle';
+    o.frequency.setValueAtTime(900,t); o.frequency.exponentialRampToValueAtTime(220,t+0.1);
+    g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.12);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t+0.14);
+  } else if(kind==='magic'){ out.gain.value=0.15;
+    const o=ac.createOscillator(),g=ac.createGain(); o.type='sine';
+    o.frequency.setValueAtTime(420,t); o.frequency.exponentialRampToValueAtTime(1500,t+0.18);
+    const lf=ac.createOscillator(),lg=ac.createGain(); lf.frequency.value=30; lg.gain.value=120;
+    lf.connect(lg); lg.connect(o.frequency); lf.start(t); lf.stop(t+0.22);
+    g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.9,t+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.22); o.connect(g); g.connect(out); o.start(t); o.stop(t+0.24);
+  } else if(kind==='boom'){ out.gain.value=0.3;
+    const o=ac.createOscillator(),g=ac.createGain(); o.type='sine';
+    o.frequency.setValueAtTime(160,t); o.frequency.exponentialRampToValueAtTime(38,t+0.25);
+    g.gain.setValueAtTime(1,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t+0.34);
+    const s=ac.createBufferSource(); s.buffer=sfxNoise(ac);
+    const bp=ac.createBiquadFilter(); bp.type='lowpass'; bp.frequency.value=1400;
+    const ng=ac.createGain(); ng.gain.setValueAtTime(0.7,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+    s.connect(bp); bp.connect(ng); ng.connect(out); s.start(t); s.stop(t+0.32);
+  } else if(kind==='deploy'){ out.gain.value=0.18;
+    const o=ac.createOscillator(),g=ac.createGain(); o.type='square';
+    o.frequency.setValueAtTime(180,t); o.frequency.linearRampToValueAtTime(360,t+0.12);
+    g.gain.setValueAtTime(0.7,t); g.gain.exponentialRampToValueAtTime(0.001,t+0.16);
+    o.connect(g); g.connect(out); o.start(t); o.stop(t+0.18);
+  }
+}
 ['pointerdown','keydown','touchstart'].forEach(ev=>
-  window.addEventListener(ev,()=>{ if(musicOn) startMusic(); },{passive:true}));
+  window.addEventListener(ev,()=>{ ensureAC(); if(musicOn) startMusic(); },{passive:true}));
 
 /* ---------- 菜单 / 关卡选择 ---------- */
-function hideOverlays(){ ['ovMenu','ovMap','ovEnd'].forEach(i=>$(i).style.display='none'); }
+function hideOverlays(){ ['ovMenu','ovMap','ovEnd','ovCodex','ovStory'].forEach(i=>$(i).style.display='none'); }
 function showMapSel(){ hideOverlays(); $('ovMap').style.display='flex'; buildMapCards(); }
+/* ---- 角色图鉴 ---- */
+function showCodex(){
+  const el=$('codexBody'); el.innerHTML='';
+  const add=(cls,title,role,desc,drawer)=>{
+    const c=document.createElement('div'); c.className='cdx '+cls;
+    const cv2=document.createElement('canvas'); cv2.width=46; cv2.height=46;
+    const g=cv2.getContext('2d'); g.translate(23,23); drawer(g);
+    const tx=document.createElement('div');
+    tx.innerHTML=`<h4>${title}</h4><div class="role">${role}</div><p>${desc}</p>`;
+    c.appendChild(cv2); c.appendChild(tx); el.appendChild(c);
+  };
+  const TN={arrow:'箭塔 / 狙击塔',mage:'法师塔 / 冰霜塔',cannon:'炮塔 / 火焰塔',barracks:'兵营 / 骑士堡'};
+  for(const k of TKEYS) add('tw',TN[k],'防御建筑',CODEX.towers[k],g=>towerArt(g,k,1,15,TOWERS[k].color,false));
+  const EN={grunt:'虚蚀工虫',runner:'蚀奔者',armor:'蚀甲虫',flyer:'蚀翼体',boss:'虚蚀魔王'};
+  for(const k of Object.keys(ENEMIES)) add('en',EN[k],'敌方单位',CODEX.enemies[k],
+    g=>enemyArt(g,{type:k,r:Math.min(16,ENEMIES[k].r),def:ENEMIES[k]}));
+  hideOverlays(); $('ovCodex').style.display='flex';
+}
+/* ---- 星战式剧情滚动 ---- */
+let _introTimer=null,_introNext=null;
+function playIntro(mi){
+  _introNext=mi;
+  const m=MAPS[mi];
+  const para=(m.story||'').split('\n').map(s=>`<p>${s}</p>`).join('');
+  $('crawl').innerHTML=`<div class="ttl">第 ${mi+1} 章<br>${m.name}</div>${para}`;
+  hideOverlays(); $('ovStory').style.display='flex';
+  // 重启 CSS 动画
+  const cr=$('crawl'); cr.style.animation='none'; void cr.offsetWidth; cr.style.animation='';
+  if(musicOn) startMusic();
+  clearTimeout(_introTimer);
+  _introTimer=setTimeout(()=>finishIntro(), 30000);
+}
+function finishIntro(){ clearTimeout(_introTimer); if(_introNext==null) return;
+  const mi=_introNext; _introNext=null; startGame(mi); }
+$('storySkip').onclick=finishIntro;
+$('toCodex').onclick=showCodex;
+$('codexBack').onclick=()=>{ hideOverlays(); $('ovMenu').style.display='flex'; };
 $('toMapSel').onclick=showMapSel;
 $('backMenu').onclick=()=>{ hideOverlays(); $('ovMenu').style.display='flex'; };
 $('mapBtn').onclick=showMapSel;
-$('retryBtn').onclick=()=>startGame(G.mi);
-$('nextBtn').onclick=()=>startGame(G.mi+1);
+$('retryBtn').onclick=()=>playIntro(G.mi);
+$('nextBtn').onclick=()=>playIntro(G.mi+1);
 $('resetProg').onclick=()=>{ PROG={cleared:Array(LEVELS).fill(false)}; saveProg(PROG); buildMapCards(); flash('进度已重置'); };
 function mapThumb(path){
   const c=document.createElement('canvas'); c.className='thumb'; c.width=160; c.height=104;
@@ -1023,7 +1205,7 @@ function buildMapCards(){
     d.innerHTML=`<h4>${i+1}. ${m.name}</h4>
       <div class="d">生命 ${m.lives} · ${m.waves.length} 波<br>末波 BOSS · 进场 ${mineCount()} 矿</div>${tag}`;
     d.insertBefore(mapThumb(m.path), d.firstChild);
-    if(!lock) d.onclick=()=>startGame(i);
+    if(!lock) d.onclick=()=>playIntro(i);
     el.appendChild(d);
   });
 }

@@ -1,0 +1,12 @@
+{
+  "name": "Space Hunters",
+  "short_name": "Space Hunters",
+  "description": "Space Hunters — 赏金猎人太空塔防：矿场产金、塔需弹药、兵营拦截、18 关剧情战役。",
+  "lang": "zh-CN",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#14181f",
+  "theme_color": "#14181f",
+  "start_url": "./index.html",
+  "scope": "./"
+}
