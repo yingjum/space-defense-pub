@@ -151,7 +151,29 @@
   .cdx .role { font-size:11px; color:#f5c451; margin-bottom:4px; }
   .cdx p { font-size:11.5px; color:#9fb0c4; line-height:1.55; max-width:none; }
   .cdx.en h4 { color:#ff8e8e; } .cdx.tw h4 { color:#6cc6ff; }
+  .cdx { cursor:pointer; transition:.12s; }
+  .cdx:hover { border-color:#f5c451; transform:translateY(-2px); }
   body.touch #codexBody { grid-template-columns:1fr; }
+  /* 详情卡 */
+  .cdxDet { width:min(820px,94vw); background:#1d2531; border:1px solid #344256; border-radius:12px;
+    padding:18px 22px; max-height:72vh; overflow-y:auto; text-align:left; }
+  .cdxDet .head { display:flex; gap:14px; align-items:center; margin-bottom:6px; }
+  .cdxDet .head canvas { flex:none; }
+  .cdxDet .head .nm { font-size:24px; font-weight:bold; }
+  .cdxDet.en .nm { color:#ff8e8e; } .cdxDet.tw .nm { color:#6cc6ff; }
+  .cdxDet .role { font-size:12px; color:#f5c451; }
+  .cdxDet .intro { font-size:14px; color:#cfe; margin:4px 0 12px; font-style:italic; }
+  .cdxDet h5 { font-size:12px; color:#93a1b5; letter-spacing:2px; margin:10px 0 4px; }
+  .cdxDet p { font-size:13px; line-height:1.7; color:#cfd6df; max-width:none; }
+  .cdxDet ul { list-style:none; padding:0; margin:4px 0; }
+  .cdxDet ul li { font-size:12.5px; color:#cfd6df; padding:3px 0 3px 16px; position:relative; }
+  .cdxDet ul li::before { content:'✦'; position:absolute; left:0; color:#f5c451; }
+  .cdxDet table { width:100%; border-collapse:collapse; margin-top:6px; font-size:12px; }
+  .cdxDet th, .cdxDet td { padding:5px 8px; border-bottom:1px solid #2a3340; text-align:right; }
+  .cdxDet th:first-child, .cdxDet td:first-child { text-align:left; color:#93a1b5; }
+  .cdxDet thead th { color:#f5c451; }
+  .cdxDet .back { margin-top:14px; background:#2a3340; color:#cfe; border:none;
+    border-radius:8px; padding:8px 16px; cursor:pointer; font-size:13px; }
   /* 剧情滚动（星战式） */
   #ovStory { background:#000; padding:0; overflow:hidden; }
   #crawlWrap { position:absolute; inset:0; display:flex; justify-content:center;
@@ -297,33 +319,33 @@ const unlocked=i=> i===0 || PROG.cleared[i-1];
 const TOWERS={
   arrow:{ color:'#5fae5f', kind:'ammo', cost:60, desc:'攻速快·便宜弹药 → 升级狙击塔(射程+攻击↑)',
     tiers:[
-      {name:'箭塔',   range:130, dmg:14, rate:0.38, ammoMax:40, ammoCost:1, splash:0, air:true, type:'phys'},
-      {name:'强弓塔', range:175, dmg:34, rate:0.55, ammoMax:34, ammoCost:2, splash:0, air:true, type:'phys'},
-      {name:'狙击塔', range:255, dmg:80, rate:1.05, ammoMax:22, ammoCost:4, splash:0, air:true, type:'phys', evo:1},
+      {name:'朱雀哨', range:130, dmg:14, rate:0.38, ammoMax:40, ammoCost:1, splash:0, air:true, type:'phys'},
+      {name:'朱雀台', range:175, dmg:34, rate:0.55, ammoMax:34, ammoCost:2, splash:0, air:true, type:'phys'},
+      {name:'后羿台', range:255, dmg:80, rate:1.05, ammoMax:22, ammoCost:4, splash:0, air:true, type:'phys', evo:1},
     ],
     perks:[ {key:'crit', name:'致命一击', desc:'25% 概率造成双倍伤害'},
             {key:'pierce', name:'贯穿箭', desc:'命中后对附近 1 个敌人追加 60% 伤害'} ]},
   mage:{ color:'#7d6cf0', kind:'ammo', cost:120, desc:'无视护甲 → 升级冰霜塔(减速)',
     tiers:[
-      {name:'法师塔', range:135, dmg:24, rate:0.8,  ammoMax:20, ammoCost:3, splash:0, air:true, type:'magic'},
-      {name:'大法师', range:145, dmg:30, rate:0.76, ammoMax:24, ammoCost:3, splash:0, air:true, type:'magic'},
-      {name:'冰霜塔', range:155, dmg:36, rate:0.72, ammoMax:28, ammoCost:3, splash:0, air:true, type:'magic', slow:0.45, evo:1},
+      {name:'巫咸坛', range:135, dmg:24, rate:0.8,  ammoMax:20, ammoCost:3, splash:0, air:true, type:'magic'},
+      {name:'巫咸阁', range:145, dmg:30, rate:0.76, ammoMax:24, ammoCost:3, splash:0, air:true, type:'magic'},
+      {name:'烛龙阁', range:155, dmg:36, rate:0.72, ammoMax:28, ammoCost:3, splash:0, air:true, type:'magic', slow:0.45, evo:1},
     ],
     perks:[ {key:'chain', name:'寒冰连锁', desc:'向最近的另一敌人弹射 50% 魔法伤害并减速'},
             {key:'shatter', name:'碎冰打击', desc:'对已被减速的敌人额外 +40% 伤害'} ]},
   cannon:{ color:'#c2773a', kind:'ammo', cost:110, desc:'范围溅射 → 升级火焰塔(持续伤害)',
     tiers:[
-      {name:'炮塔',   range:120, dmg:30, rate:1.1,  ammoMax:16, ammoCost:4, splash:55, air:false, type:'phys'},
-      {name:'重炮塔', range:124, dmg:30, rate:1.15, ammoMax:18, ammoCost:4, splash:50, air:false, type:'phys'},
-      {name:'火焰塔', range:128, dmg:33, rate:1.1,  ammoMax:20, ammoCost:5, splash:52, air:false, type:'phys', burn:10, burnT:3, evo:1},
+      {name:'共工垒', range:120, dmg:30, rate:1.1,  ammoMax:16, ammoCost:4, splash:55, air:false, type:'phys'},
+      {name:'共工炮', range:124, dmg:30, rate:1.15, ammoMax:18, ammoCost:4, splash:50, air:false, type:'phys'},
+      {name:'毕方阁', range:128, dmg:33, rate:1.1,  ammoMax:20, ammoCost:5, splash:52, air:false, type:'phys', burn:10, burnT:3, evo:1},
     ],
     perks:[ {key:'napalm', name:'燃油弹', desc:'落点留下燃烧地带，持续灼伤经过的敌人 4 秒'},
             {key:'bigblast', name:'巨型弹', desc:'溅射范围 +45%'} ]},
   barracks:{ color:'#c9a24b', kind:'weapon', cost:100, desc:'士兵肉身拦截 → 升级骑士堡(高血+护甲)',
     tiers:[
-      {name:'兵营',   range:130, count:2, sHp:45,  sDmg:11, wpMax:115, repair:0.55, armor:0},
-      {name:'卫戍营', range:138, count:3, sHp:80,  sDmg:15, wpMax:135, repair:0.55, armor:2},
-      {name:'骑士堡', range:145, count:3, sHp:115, sDmg:19, wpMax:160, repair:0.55, armor:4, evo:1},
+      {name:'刑天哨', range:130, count:2, sHp:45,  sDmg:11, wpMax:115, repair:0.55, armor:0},
+      {name:'蚩尤营', range:138, count:3, sHp:80,  sDmg:15, wpMax:135, repair:0.55, armor:2},
+      {name:'玄武堡', range:145, count:3, sHp:115, sDmg:19, wpMax:160, repair:0.55, armor:4, evo:1},
     ],
     perks:[ {key:'regen', name:'战地医疗', desc:'士兵每秒缓慢回复生命'},
             {key:'thorns', name:'荆棘铠甲', desc:'敌人攻击士兵时受到反伤'} ]},
@@ -332,11 +354,11 @@ const TKEYS=Object.keys(TOWERS);
 
 /* ---------- 敌人 ---------- */
 const ENEMIES={
-  grunt: { name:'小兵',  hp:42,  speed:46,  armor:2,  mres:0,  r:11, color:'#c14b4b', air:false, mdmg:9  },
-  runner:{ name:'奔行者',hp:28,  speed:118, armor:0,  mres:0,  r:9,  color:'#d68a3a', air:false, mdmg:6  },
-  armor: { name:'重甲兵',hp:135, speed:32,  armor:13, mres:7,  r:13, color:'#8a97a6', air:false, mdmg:16 },
-  flyer: { name:'飞行兵',hp:54,  speed:82,  armor:1,  mres:6,  r:10, color:'#b07de0', air:true,  mdmg:0  },
-  boss:  { name:'魔王',  hp:4200,speed:28,  armor:20, mres:20, r:24, color:'#e0407a', air:false, mdmg:58 },
+  grunt: { name:'山膏',  hp:42,  speed:46,  armor:2,  mres:0,  r:11, color:'#c14b4b', air:false, mdmg:9  },
+  runner:{ name:'鹿蜀',  hp:28,  speed:118, armor:0,  mres:0,  r:9,  color:'#d68a3a', air:false, mdmg:6  },
+  armor: { name:'諸犍',  hp:135, speed:32,  armor:13, mres:7,  r:13, color:'#8a97a6', air:false, mdmg:16 },
+  flyer: { name:'颙',    hp:54,  speed:82,  armor:1,  mres:6,  r:10, color:'#b07de0', air:true,  mdmg:0  },
+  boss:  { name:'穷奇',  hp:4200,speed:28,  armor:20, mres:20, r:24, color:'#e0407a', air:false, mdmg:58 },
 };
 
 /* ---------- 7 张地图（弯曲路径，路边自动生成建造位） ---------- */
@@ -422,22 +444,61 @@ const SAGA=[
 ];
 MAPS.forEach((m,i)=>{ if(SAGA[i]){ m.name=SAGA[i].name; m.story=SAGA[i].s; } });
 
-/* ---------- 角色图鉴（背景设定） ---------- */
+/* ---------- 角色图鉴（山海经神话设定） ---------- */
 const CODEX={
   towers:{
-    arrow:'晨曦矿带的猎人最先掌握的速射弓弩塔。便宜、攻速快，三级进化为「狙击塔」，可远距点杀。特性：致命一击 / 贯穿箭。',
-    mage:'公会从遗迹文明逆向出的能量法塔，伤害无视护甲。三级进化「冰霜塔」可冻缓虫群。特性：寒冰连锁 / 碎冰打击。',
-    cannon:'矿工改装的重型轨道炮，范围溅射，专治成群虫潮。三级进化「火焰塔」附带灼烧。一级最均衡，二三级威力被公会限流。特性：燃油弹 / 巨型弹。',
-    barracks:'赏金猎人本部派出的肉身防线。士兵不耗弹药，但武器会越打越钝，需返厂更换。三级「骑士堡」披重甲。特性：战地医疗 / 荆棘铠甲。',
+    arrow:{
+      intro:'朱雀啼鸣，后羿之弦不绝。',
+      origin:'《山海经·南山经》：丹穴之山有鸟，五采而文，名曰凤皇（朱雀同源）。又《海外南经》载后羿善射，曾射九日落于汤谷。',
+      habits:'驻于高台，张弦以待。箭矢追星逐月，对群兼可，对单亦能点杀。三阶化作「后羿台」，可隔星海远距狙击。',
+      traits:['攻速极快·弹药便宜','可击飞行单位','三阶进化：后羿台·远距点杀','特性可选：致命一击 / 贯穿箭'] },
+    mage:{
+      intro:'巫咸沟通天地，烛龙呼吸成寒。',
+      origin:'《海外西经》：巫咸国在女丑北。《大荒北经》：钟山之神，名曰烛阴，吹为冬、呼为夏。',
+      habits:'焚星图为咒，伤害无视护甲。三阶唤醒烛龙气息，所及之处万物冻缓。',
+      traits:['魔法伤害·无视护甲','三阶进化：烛龙阁·附加冰霜减速','特性可选：寒冰连锁 / 碎冰打击'] },
+    cannon:{
+      intro:'共工怒触不周，毕方衔火而至。',
+      origin:'《海外北经》：共工与颛顼争为帝，怒触不周之山，天柱折。又《西山经》：章莪之山有鸟焉，名曰毕方，见则其邑有讹火。',
+      habits:'重弹砸地，群虫倒一片。三阶化为毕方之阁，弹落之处余焰不熄。',
+      traits:['范围溅射·对群最强','无法攻击飞行','三阶进化：毕方阁·灼烧持续伤害','特性可选：燃油弹 / 巨型弹'] },
+    barracks:{
+      intro:'刑天断首仍执干戚，玄武负甲守北方。',
+      origin:'《海外西经》：刑天与帝至此争神，帝断其首，乃以乳为目、以脐为口，操干戚以舞。玄武为北方七宿之灵，龟蛇合体。',
+      habits:'派遣士卒结阵于路，肉身拦截。武器越用越钝，需以金币返厂修复。可手动指定集结点。',
+      traits:['士兵不耗弹药·肉身拦阻','武器耐久会损耗','可手动设定集结点（射程内）','三阶进化：玄武堡·重甲护身','特性可选：战地医疗 / 荆棘铠甲'] },
   },
   enemies:{
-    grunt:'虚蚀工虫。最常见的虫群单位，成群结队，被虚空腐蚀的躯壳仍有薄甲。',
-    runner:'蚀奔者。退化出极速的虫体，血薄却能瞬间冲过防线，专挑空档。',
-    armor:'蚀甲虫。厚重的几丁质装甲让物理炮火收效甚微，需法术或狙击破防。',
-    flyer:'蚀翼体。低空掠行，只有可对空的塔能触及，绕过一切地面拦截。',
-    boss:'虚蚀魔王。虫群的母体意志。会召唤帮手，并能短距「穿越」——即便被士兵缠住也能挣脱。终末之门的最后猎物。',
+    grunt:{
+      intro:'山膏似豕而人面，群行则啸。',
+      origin:'《中山经》：苦山有兽焉，名曰山膏，其状如豚，赤若丹火，善骂。',
+      habits:'成群结队从星空滑入战场。单体孱弱，群涌则可冲垮前线。',
+      traits:['最常见的基础敌人','靠数量取胜','属性均衡'] },
+    runner:{
+      intro:'鹿蜀虎纹马身，奔走如电。',
+      origin:'《南山经》：杻阳之山有兽焉，状如马而白首，其文如虎，其音如谣，名曰鹿蜀。',
+      habits:'皮薄速极，专走防线空隙；一旦漏过几乎追不上。',
+      traits:['移速最快','血量极低','适合用攻速塔 / 狙击点杀'] },
+    armor:{
+      intro:'諸犍身被甲鳞，刀矢难入。',
+      origin:'《北山经》：单张之山有兽焉，状如豹而长尾，人首牛耳一目，名曰諸犍。',
+      habits:'重甲压境，物理射击折损大半，需要法术或狙击破甲。',
+      traits:['护甲极高','移速缓慢','对法师塔 / 后羿台较脆'] },
+    flyer:{
+      intro:'颙有四目而鸟身，至则旱。',
+      origin:'《南山经》：令丘之山有鸟焉，其状如枭，人面四目而有耳，名曰颙。',
+      habits:'低空掠行，地面部队无法触及。只有可对空的塔能命中。',
+      traits:['飞行单位','炮塔/兵营无法触及','需朱雀线 / 巫咸线 / 狙击防空'] },
+    boss:{
+      intro:'穷奇有翼似虎，啖人无餍。',
+      origin:'《海内北经》：穷奇状如虎，有翼，食人从首始。又被列为「四凶」之一。',
+      habits:'波末降临，可召唤山膏与鹿蜀为前驱；并能短距「穿越」——即便被士兵缠住也能挣脱。',
+      traits:['终极 Boss·血量极厚','可召唤帮手','可短距穿越·能挣脱拦截'] },
   }
 };
+// 一句话用于列表预览
+const CODEX_LIST_NAMES={ arrow:'朱雀／后羿系', mage:'巫咸／烛龙系', cannon:'共工／毕方系', barracks:'刑天／玄武系' };
+const CODEX_ENEMY_NAMES={ grunt:'山膏', runner:'鹿蜀', armor:'諸犍', flyer:'颙', boss:'穷奇' };
 
 /* ---------- 路径与建造位 ---------- */
 function pathLen(p){ let L=0; for(let i=1;i<p.length;i++) L+=dist(p[i-1][0],p[i-1][1],p[i][0],p[i][1]); return L; }
@@ -1259,23 +1320,82 @@ function sfx(kind){
 /* ---------- 菜单 / 关卡选择 ---------- */
 function hideOverlays(){ ['ovMenu','ovMap','ovEnd','ovCodex','ovStory','ovSettings'].forEach(i=>$(i).style.display='none'); }
 function showMapSel(){ hideOverlays(); $('ovMap').style.display='flex'; buildMapCards(); }
-/* ---- 角色图鉴 ---- */
+/* ---- 角色图鉴：列表 + 详情卡 ---- */
 function showCodex(){
-  const el=$('codexBody'); el.innerHTML='';
-  const add=(cls,title,role,desc,drawer)=>{
+  const el=$('codexBody'); el.style.display='grid'; el.innerHTML='';
+  const add=(cls,title,role,intro,drawer,onclick)=>{
     const c=document.createElement('div'); c.className='cdx '+cls;
     const cv2=document.createElement('canvas'); cv2.width=46; cv2.height=46;
     const g=cv2.getContext('2d'); g.translate(23,23); drawer(g);
     const tx=document.createElement('div');
-    tx.innerHTML=`<h4>${title}</h4><div class="role">${role}</div><p>${desc}</p>`;
-    c.appendChild(cv2); c.appendChild(tx); el.appendChild(c);
+    tx.innerHTML=`<h4>${title}</h4><div class="role">${role}</div><p>${intro}</p>`;
+    c.appendChild(cv2); c.appendChild(tx); c.onclick=onclick; el.appendChild(c);
   };
-  const TN={arrow:'箭塔 / 狙击塔',mage:'法师塔 / 冰霜塔',cannon:'炮塔 / 火焰塔',barracks:'兵营 / 骑士堡'};
-  for(const k of TKEYS) add('tw',TN[k],'防御建筑',CODEX.towers[k],g=>towerArt(g,k,1,15,TOWERS[k].color,false));
-  const EN={grunt:'虚蚀工虫',runner:'蚀奔者',armor:'蚀甲虫',flyer:'蚀翼体',boss:'虚蚀魔王'};
-  for(const k of Object.keys(ENEMIES)) add('en',EN[k],'敌方单位',CODEX.enemies[k],
-    g=>enemyArt(g,{type:k,r:Math.min(16,ENEMIES[k].r),def:ENEMIES[k]}));
+  for(const k of TKEYS){ const t=TOWERS[k], lore=CODEX.towers[k];
+    const title=`${CODEX_LIST_NAMES[k]} · ${t.tiers.map(x=>x.name).join(' / ')}`;
+    add('tw', title, '防御建筑（点开详情）', lore.intro,
+      g=>towerArt(g,k,1,15,t.color,false), ()=>showCharDetail('tower',k)); }
+  for(const k of Object.keys(ENEMIES)){ const e=ENEMIES[k], lore=CODEX.enemies[k];
+    add('en', CODEX_ENEMY_NAMES[k], '敌方单位（点开详情）', lore.intro,
+      g=>enemyArt(g,{type:k,r:Math.min(16,e.r),def:e}), ()=>showCharDetail('enemy',k)); }
   hideOverlays(); $('ovCodex').style.display='flex';
+}
+function showCharDetail(kind,key){
+  const el=$('codexBody'); el.style.display='block'; el.innerHTML='';
+  const det=document.createElement('div'); det.className='cdxDet '+(kind==='tower'?'tw':'en');
+  let icon,nm,role,lore,statsHTML;
+  if(kind==='tower'){
+    const t=TOWERS[key]; lore=CODEX.towers[key];
+    nm = `${CODEX_LIST_NAMES[key]}`; role = '防御建筑 · 三阶进化';
+    icon=`<canvas width="64" height="64"></canvas>`;
+    // 数值汇总：每一阶一列
+    const rows=[
+      ['名称', t.tiers.map(x=>x.name)],
+      ['造价/升级', [t.cost+' 金（造价）', Math.round(t.cost*0.8)+' 金（升 2 阶）', Math.round(t.cost*0.8*1.5)+' 金（升 3 阶）']],
+    ];
+    if(t.kind==='ammo'){
+      rows.push(['伤害',t.tiers.map(x=>x.dmg)]);
+      rows.push(['射程',t.tiers.map(x=>x.range)]);
+      rows.push(['攻击间隔',t.tiers.map(x=>x.rate+' s')]);
+      rows.push(['弹药/单价',t.tiers.map(x=>x.ammoMax+' 发 · '+x.ammoCost+' 金/发')]);
+      rows.push(['溅射半径',t.tiers.map(x=>x.splash||'—')]);
+      rows.push(['伤害类型',t.tiers.map(x=>x.type==='magic'?'魔法':'物理')]);
+      rows.push(['可击空中',t.tiers.map(x=>x.air?'是':'否')]);
+      rows.push(['特殊',t.tiers.map(x=> x.slow?('减速 ×'+x.slow):x.burn?('灼烧 '+x.burn+' /秒 · '+x.burnT+'秒'):'—')]);
+    } else {
+      rows.push(['士兵数',t.tiers.map(x=>x.count)]);
+      rows.push(['单兵血量',t.tiers.map(x=>x.sHp)]);
+      rows.push(['单兵伤害',t.tiers.map(x=>x.sDmg)]);
+      rows.push(['士兵护甲',t.tiers.map(x=>x.armor||0)]);
+      rows.push(['武器耐久',t.tiers.map(x=>x.wpMax)]);
+      rows.push(['修武器单价',t.tiers.map(x=>x.repair+' 金/耐久')]);
+      rows.push(['射程/集结',t.tiers.map(x=>x.range)]);
+    }
+    statsHTML=`<table><thead><tr><th>属性</th><th>1 阶</th><th>2 阶</th><th>3 阶 ✦</th></tr></thead><tbody>`+
+      rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1][0]}</td><td>${r[1][1]}</td><td>${r[1][2]}</td></tr>`).join('')+`</tbody></table>`;
+  } else {
+    const e=ENEMIES[key]; lore=CODEX.enemies[key];
+    nm=CODEX_ENEMY_NAMES[key]; role='敌方单位';
+    icon=`<canvas width="64" height="64"></canvas>`;
+    const rows=[
+      ['血量',e.hp], ['移速',e.speed], ['护甲',e.armor], ['魔抗',e.mres||0],
+      ['可飞行',e.air?'是':'否'], ['近战伤害（对士兵）', e.mdmg],
+    ];
+    statsHTML=`<table><tbody>`+rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')+`</tbody></table>`;
+  }
+  det.innerHTML=`<div class="head">${icon}<div><div class="nm">${nm}</div><div class="role">${role}</div></div></div>
+    <div class="intro">「${lore.intro}」</div>
+    <h5>来源 ·《山海经》</h5><p>${lore.origin}</p>
+    <h5>习性</h5><p>${lore.habits}</p>
+    <h5>特性</h5><ul>${lore.traits.map(t=>`<li>${t}</li>`).join('')}</ul>
+    <h5>属性数值</h5>${statsHTML}
+    <button class="back" id="cdxToList">◀ 返回图鉴列表</button>`;
+  el.appendChild(det);
+  // 画图标
+  const c=det.querySelector('.head canvas'), g=c.getContext('2d'); g.translate(32,32);
+  if(kind==='tower') towerArt(g, key, 3, 22, TOWERS[key].color, false);
+  else { const e=ENEMIES[key]; enemyArt(g,{type:key,r:Math.min(22,e.r+4),def:e}); }
+  $('cdxToList').onclick=showCodex;
 }
 /* ---- 星战式剧情滚动 ---- */
 let _introTimer=null,_introNext=null;
