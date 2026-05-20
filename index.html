@@ -69,11 +69,14 @@
   body.tablet .mapsel, body.touch .mapsel { grid-template-columns:repeat(4,150px); }
   .mapcard { position:relative; overflow:hidden; background:#1d2531; border:1px solid #344256; border-radius:10px; padding:13px; cursor:pointer; transition:.15s; }
   .mapcard:hover { border-color:#f5c451; transform:translateY(-3px); }
-  .mapcard:hover .thumb { opacity:.5; }
   .mapcard.lock { opacity:.42; cursor:not-allowed; filter:grayscale(.6); }
-  .mapcard .thumb { position:absolute; inset:0; width:100%; height:100%; opacity:.3; z-index:0; transition:.15s; pointer-events:none; }
-  .mapcard h4, .mapcard .d, .mapcard .tag { position:relative; z-index:1; }
-  .mapcard h4 { font-size:15px; margin-bottom:5px; }
+  /* 路径缩略图：放在卡片底部 1/3 处当装饰，永远低不透明，悬停/点击也不抢字 */
+  .mapcard .thumb { position:absolute; left:0; right:0; bottom:0; height:48%;
+    opacity:.22; z-index:0; pointer-events:none;
+    -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0));
+            mask-image:linear-gradient(to top, rgba(0,0,0,1), rgba(0,0,0,0)); }
+  .mapcard h4, .mapcard .d, .mapcard .tag { position:relative; z-index:2; }
+  .mapcard h4 { font-size:15px; margin-bottom:5px; text-shadow:0 1px 3px #0c0f15; }
   .mapcard .d { color:#cdd6e2; font-size:11px; line-height:1.55; text-shadow:0 1px 3px #0c0f15; }
   .mapcard .tag { display:inline-block; margin-top:8px; font-size:10px; padding:3px 7px; border-radius:10px; }
   .tag.mid{background:#3a352b;color:#f5d08a;} .tag.hard{background:#3a2b2b;color:#ffb0b0;}
@@ -146,7 +149,9 @@
     grid-template-columns:1fr 1fr; gap:10px; padding:4px 8px; }
   .cdx { background:#1d2531; border:1px solid #303b4b; border-radius:9px; padding:9px 11px;
     display:flex; gap:10px; text-align:left; }
-  .cdx canvas { flex:none; }
+  .cdx canvas { flex:none; pointer-events:none; }
+  .cdx > div { position:relative; z-index:2; }
+  .cdxDet .head canvas { pointer-events:none; }
   .cdx h4 { font-size:14px; margin-bottom:2px; }
   .cdx .role { font-size:11px; color:#f5c451; margin-bottom:4px; }
   .cdx p { font-size:11.5px; color:#9fb0c4; line-height:1.55; max-width:none; }
@@ -286,6 +291,16 @@
         <p class="hint" style="margin-top:10px">打开设置时游戏自动暂停，关闭后自动继续。</p>
       </div>
     </div>
+
+    <div class="overlay" id="ovIntro" style="display:none">
+      <div class="panel" style="background:#1d2531;border:1px solid #344256;border-radius:14px;padding:22px 28px;text-align:center;min-width:380px;max-width:90%">
+        <div style="font-size:13px;color:#f5c451;letter-spacing:2px">⚠ 新敌人登场</div>
+        <h2 id="introName" style="font-size:26px;margin:6px 0 8px;color:#ff8e8e"></h2>
+        <canvas id="introArt" width="120" height="120" style="display:block;margin:8px auto"></canvas>
+        <p id="introText" style="color:#cfd6df;font-size:14px;line-height:1.7;max-width:480px;margin:6px auto"></p>
+        <button class="bigbtn" id="introCont" style="margin-top:14px">▶ 继续</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -306,13 +321,15 @@ function flash(t){ const m=$('msg'); m.textContent=t; m.style.opacity=1; clearTi
 
 /* ---------- 进度存档 ---------- */
 const SAVE='oredef_v1';
-function loadProg(){ let c=null, st=null, e1=0, e2=0;
-  try{ const p=JSON.parse(localStorage.getItem(SAVE)); if(p){ if(p.cleared)c=p.cleared; if(p.stars)st=p.stars; e1=p.endless1Best||0; e2=p.endless2Best||0; } }catch(e){}
+function loadProg(){ let c=null, st=null, e1=0, e2=0, seen={};
+  try{ const p=JSON.parse(localStorage.getItem(SAVE));
+    if(p){ if(p.cleared)c=p.cleared; if(p.stars)st=p.stars;
+      e1=p.endless1Best||0; e2=p.endless2Best||0; if(p.seenEnemies) seen=p.seenEnemies; } }catch(e){}
   if(!c) c=[]; if(!st) st=[];
   const arr=Array(LEVELS).fill(false), stars=Array(LEVELS).fill(0);
   for(let i=0;i<Math.min(c.length,LEVELS);i++) arr[i]=!!c[i];
   for(let i=0;i<Math.min(st.length,LEVELS);i++) stars[i]=+st[i]||0;
-  return { cleared:arr, stars, endless1Best:e1, endless2Best:e2 }; }
+  return { cleared:arr, stars, endless1Best:e1, endless2Best:e2, seenEnemies:seen }; }
 function saveProg(p){ try{ localStorage.setItem(SAVE,JSON.stringify(p)); }catch(e){} }
 let PROG=loadProg();
 const clearedCount=()=>PROG.cleared.filter(Boolean).length;
@@ -1211,6 +1228,7 @@ function step(dt){
   // 按绝对时间从 spawnList 出兵
   while(G.spawnList.length && G.spawnList[0].spawnAt <= G.clock){
     const s=G.spawnList.shift(); G.enemies.push(new Enemy(s.type, s.hpMul));
+    triggerIntroIfNew(s.type);   // 首次出场敌人 → 暂停弹介绍卡
   }
   // 胜负：所有波已排程 + 出完 + 没活敌人 = 胜利
   if(G.started && G.phase!=='done' && G.waveIdx>=G.totalWaves && G.spawnList.length===0 && G.enemies.length===0){
@@ -1504,6 +1522,36 @@ function setPaused(p, silent){
 $('pausebtn').onclick=()=>{ setPaused(!paused); flash(paused?'已暂停':'继续'); };
 function backToMenu(){ if(G) G.running=false; setPaused(false,true); rallySetFor=null;
   selectedTower=null; closeBuildMenu(); renderSel(); hideOverlays(); $('ovMenu').style.display='flex'; }
+/* ---- 新敌人首次登场：暂停 + 介绍卡（按 PROG.seenEnemies 永久记录） ---- */
+let _introResume=false, _introQueue=[];
+function triggerIntroIfNew(type){
+  if(!PROG.seenEnemies) PROG.seenEnemies={};
+  if(PROG.seenEnemies[type]) return;
+  PROG.seenEnemies[type]=true; saveProg(PROG);
+  _introQueue.push(type);
+  if($('ovIntro').style.display!=='flex') showNextIntro();
+}
+function showNextIntro(){
+  if(_introQueue.length===0){
+    $('ovIntro').style.display='none';
+    if(_introResume) setPaused(false,true);
+    _introResume=false; return;
+  }
+  const type=_introQueue.shift();
+  const e=ENEMIES[type], lore=(CODEX.enemies&&CODEX.enemies[type])||{intro:'（未知敌人）'};
+  const nm=(CODEX_ENEMY_NAMES&&CODEX_ENEMY_NAMES[type])||e.name||type;
+  $('introName').textContent='⚠ '+nm;
+  $('introText').textContent=lore.intro || '';
+  const c=$('introArt'); const g=c.getContext('2d');
+  g.clearRect(0,0,c.width,c.height);
+  g.save(); g.translate(c.width/2, c.height/2);
+  enemyArt(g,{type, r:Math.min(40,(e.r||16)+18), def:e, blocker:null});
+  g.restore();
+  // 自动暂停（保留之前的暂停意图）
+  if(!paused){ setPaused(true,true); _introResume=true; }
+  $('ovIntro').style.display='flex';
+}
+$('introCont').onclick=showNextIntro;
 /* ---- 设置面板：打开自动暂停，关闭自动继续 ---- */
 let _settingsResume=false;
 function openSettings(){
@@ -1664,7 +1712,7 @@ function sfx(kind){
   window.addEventListener(ev,()=>{ ensureAC(); if(musicOn) startMusic(); },{passive:true}));
 
 /* ---------- 菜单 / 关卡选择 ---------- */
-function hideOverlays(){ ['ovMenu','ovMap','ovEnd','ovCodex','ovStory','ovSettings'].forEach(i=>$(i).style.display='none'); }
+function hideOverlays(){ ['ovMenu','ovMap','ovEnd','ovCodex','ovStory','ovSettings','ovIntro'].forEach(i=>$(i).style.display='none'); }
 function showMapSel(){ hideOverlays(); $('ovMap').style.display='flex'; buildMapCards(); }
 /* ---- 角色图鉴：列表 + 详情卡 ---- */
 function showCodex(){
