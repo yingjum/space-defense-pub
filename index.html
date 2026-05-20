@@ -1170,7 +1170,7 @@ function openSettings(){
   if(!G||G.phase==='done') return;          // 主菜单时设置无意义
   _settingsResume = !paused;
   setPaused(true);
-  syncSettingsUI();
+  syncSettingsUI(); syncAdminBtn();
   hideOverlays(); $('ovSettings').style.display='flex';
 }
 function closeSettings(){
@@ -1191,8 +1191,14 @@ document.querySelectorAll('#setSfx button').forEach(b=>b.onclick=()=>{
   sfxOn=(b.dataset.v==='on'); localStorage.setItem('sh_sfx',sfxOn?'on':'off'); syncSettingsUI(); });
 $('sClose').onclick=closeSettings;
 $('sHome').onclick =()=>{ closeSettings(); backToMenu(); };
-$('sAdmin').onclick=()=>{ PROG.cleared=Array(LEVELS).fill(true); saveProg(PROG);
-  flash('🔓 管理员模式：已解锁全部关卡 + 矿数拉满'); };
+function syncAdminBtn(){ const b=$('sAdmin'); if(!b) return;
+  const all=PROG.cleared.every(Boolean);
+  b.textContent = all ? '🔒 关闭管理员（重置进度）' : '🔓 管理员：解锁全部关卡'; }
+$('sAdmin').onclick=()=>{
+  const all=PROG.cleared.every(Boolean);
+  PROG.cleared=Array(LEVELS).fill(!all); saveProg(PROG);
+  flash(all ? '🔒 管理员已关闭：进度已重置' : '🔓 管理员模式：已解锁全部关卡');
+  syncAdminBtn(); };
 
 /* ---------- 背景音乐（程序生成，无需外部文件） ---------- */
 let AC=null, musicTimer=null, _mbus=null, _mdrone=null;
