@@ -596,15 +596,57 @@ function towerArt(g,key,tier,R,col,empty){
   const c=empty?'#5a5f66':col;
   g.lineWidth=2; g.strokeStyle='#10151c'; g.fillStyle=c;
   if(key==='arrow'){
-    if(tier>=3){ // 狙击塔
-      g.beginPath(); g.arc(0,0,R*0.62,0,7); g.stroke();
-      g.beginPath(); g.moveTo(-R*0.9,0); g.lineTo(R*0.9,0); g.moveTo(0,-R*0.9); g.lineTo(0,R*0.9); g.stroke();
-      g.fillStyle=c; g.beginPath(); g.arc(0,0,3,0,7); g.fill();
-    } else { // 弓
-      g.beginPath(); g.arc(2,0,R*0.7,-1.1,1.1); g.stroke();
-      g.beginPath(); g.moveTo(2+Math.cos(-1.1)*R*0.7,Math.sin(-1.1)*R*0.7); g.lineTo(2+Math.cos(1.1)*R*0.7,Math.sin(1.1)*R*0.7); g.stroke();
-      g.beginPath(); g.moveTo(-R*0.7,0); g.lineTo(R*0.7,0); g.lineWidth=2.5; g.stroke();
-      g.fillStyle=c; g.beginPath(); g.moveTo(R*0.7,0); g.lineTo(R*0.4,-4); g.lineTo(R*0.4,4); g.fill();
+    // === 伪 3D：径向渐变穹顶 + 内部支柱 + 顶部标记，左上有高光（光从左上来） ===
+    // 落地阴影（斜椭圆）
+    g.save(); g.translate(R*0.15, R*0.55); g.scale(1,0.42);
+    g.fillStyle='rgba(0,0,0,.35)'; g.beginPath(); g.arc(0,0,R*0.95,0,7); g.fill(); g.restore();
+    // 基座穹顶
+    const rg=g.createRadialGradient(-R*0.45,-R*0.50,1, 0,0,R*1.05);
+    if(empty){ rg.addColorStop(0,'#a3a8af'); rg.addColorStop(0.55,'#5e636b'); rg.addColorStop(1,'#23262c'); }
+    else     { rg.addColorStop(0,'#c1f0a8'); rg.addColorStop(0.55,c);           rg.addColorStop(1,'#10261a'); }
+    g.fillStyle=rg; g.beginPath(); g.arc(0,0,R*1.05,0,7); g.fill();
+    g.strokeStyle='rgba(0,0,0,.6)'; g.lineWidth=1.2; g.stroke();
+    // 上沿月牙高光
+    g.strokeStyle='rgba(255,255,255,.45)'; g.lineWidth=1.5;
+    g.beginPath(); g.arc(0,0,R*0.92,-Math.PI*0.95,-Math.PI*0.15); g.stroke();
+    // 内圆支柱
+    const rg2=g.createRadialGradient(-R*0.22,-R*0.28,1, 0,0,R*0.55);
+    if(empty){ rg2.addColorStop(0,'#6a6f78'); rg2.addColorStop(1,'#1a1c20'); }
+    else     { rg2.addColorStop(0,'#e6fbd6'); rg2.addColorStop(1,'#27462d'); }
+    g.fillStyle=rg2; g.beginPath(); g.arc(0,0,R*0.55,0,7); g.fill();
+    g.strokeStyle='rgba(0,0,0,.55)'; g.lineWidth=1; g.stroke();
+    g.strokeStyle='rgba(255,255,255,.30)'; g.lineWidth=1;
+    g.beginPath(); g.arc(0,0,R*0.5,-Math.PI*0.9,-Math.PI*0.25); g.stroke();
+    // 顶部图案
+    if(tier>=3){
+      // 狙击瞄镜：环 + 十字 + 中心高光
+      g.strokeStyle='rgba(20,30,20,.9)'; g.lineWidth=2;
+      g.beginPath(); g.arc(0,0,R*0.36,0,7); g.stroke();
+      g.beginPath(); g.moveTo(-R*0.58,0); g.lineTo(R*0.58,0);
+                     g.moveTo(0,-R*0.58); g.lineTo(0,R*0.58); g.stroke();
+      g.fillStyle='#f5c451'; g.beginPath(); g.arc(0,0,2.6,0,7); g.fill();
+      g.fillStyle='rgba(255,255,255,.85)'; g.beginPath(); g.arc(-1,-1.1,0.9,0,7); g.fill();
+    } else {
+      // 斜放的弓 + 渐变箭（伪 3D 视角）
+      g.save(); g.rotate(-0.22);
+      g.strokeStyle='rgba(20,30,20,.92)'; g.lineWidth=2.2;
+      g.beginPath(); g.arc(2,0,R*0.66,-1.1,1.1); g.stroke();
+      g.beginPath();
+      g.moveTo(2+Math.cos(-1.1)*R*0.66, Math.sin(-1.1)*R*0.66);
+      g.lineTo(2+Math.cos( 1.1)*R*0.66, Math.sin( 1.1)*R*0.66); g.stroke();
+      // 箭杆：金属渐变 + 上缘细高光
+      const ag=g.createLinearGradient(-R*0.6,0,R*0.6,0);
+      ag.addColorStop(0,'#7a5b2c'); ag.addColorStop(0.6,'#d6a85a'); ag.addColorStop(1,'#fff1c2');
+      g.strokeStyle=ag; g.lineWidth=2.6;
+      g.beginPath(); g.moveTo(-R*0.55,0); g.lineTo(R*0.6,0); g.stroke();
+      g.strokeStyle='rgba(255,255,255,.55)'; g.lineWidth=0.8;
+      g.beginPath(); g.moveTo(-R*0.5,-1); g.lineTo(R*0.5,-1); g.stroke();
+      // 箭头：带阴影面
+      g.fillStyle='#f5c451'; g.beginPath();
+      g.moveTo(R*0.68,0); g.lineTo(R*0.38,-3.8); g.lineTo(R*0.38,3.8); g.closePath(); g.fill();
+      g.fillStyle='rgba(0,0,0,.35)'; g.beginPath();
+      g.moveTo(R*0.68,0); g.lineTo(R*0.38,3.8); g.lineTo(R*0.5,0); g.closePath(); g.fill();
+      g.restore();
     }
   } else if(key==='mage'){
     g.beginPath(); g.arc(0,2,R*0.55,0,7); g.fill(); g.stroke();
