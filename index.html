@@ -1132,7 +1132,7 @@ class Shot{
 function startGame(mi){
   const M=MAPS[mi];
   const sp=genSpace(M.routes, themeFor(mi));
-  G={ mi, M, routes:M.routes, path:M.routes[0], pads:genPads(M.routes, mi), gold:120, lives:20, livesMax:20,
+  G={ mi, M, routes:M.routes, path:M.routes[0], pads:genPads(M.routes, mi), gold:200, lives:20, livesMax:20,
       clock:0, nextWaveAt:Infinity, spawnList:[],
       mines:mineCount(), waveIdx:0, totalWaves:M.waves.length, _ri:0,
       enemies:[], pendingEnemies:[], towers:[], shots:[], blasts:[], zones:[], phase:'prep', spawnQ:[], spawnT:0,
