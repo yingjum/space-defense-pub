@@ -578,11 +578,45 @@ const CODEX={
       origin:'异化进入终极形态：身体魁梧、单眼独占脸面，最显眼的是头顶生出的双脚（旧种族基因错乱），右手挥舞巨型粗棒。',
       habits:'波末降临，会召唤帮手并能短距「穿越」——即便被士兵缠住也能挣脱。挥棒攻击伤害极高。',
       traits:['终极 Boss·血量巨厚','头上有脚·独眼','挥舞粗棒近战','可召唤山兵/奔行者','可短距穿越·挣脱士兵'] },
+    bossEarth:{
+      intro:'山岳之主：第 6 关守关 Boss，绿色岩石巨躯。',
+      origin:'地球地壳异化的金属与岩石结合体，第六章的最后猎杀目标。',
+      habits:'外形与魔王同源但更加巨大，挥舞由整块山岩雕成的粗棒。',
+      traits:['第 6 关特殊 Boss','血量与护甲更高','岩石巨棒近战'] },
+    bossSpace:{
+      intro:'虚空主宰：第 12 关守关 Boss，蓝紫能量体。',
+      origin:'宇宙篇章的尽头，凝聚自虚空的高密度能量生命体。',
+      habits:'独眼闪烁蓝光，浮空感强；挥舞镶有水晶碎片的能量粗棒。',
+      traits:['第 12 关特殊 Boss','血量极厚、魔抗较高','能量粗棒近战'] },
+    bossHell:{
+      intro:'熔狱魔神：第 18 关最终 Boss，赤红熔岩巨体。',
+      origin:'地狱星章的终末守门人，肉身由熔浆与黑铁构成。',
+      habits:'独眼血红、口吐黑烟；棒头镶有炽热岩浆点，挥舞时空气都灼烧。',
+      traits:['第 18 关最终 Boss','全游戏最高血量与护甲','熔岩粗棒灼烧'] },
+    biter:{
+      intro:'撕咬虫：小兵变种，体型更小、速度更快。',
+      origin:'通关 2 关后开始登场，是小兵的快速捕食型分支。',
+      habits:'低血量但跑得飞快，攻击靠咬合；常成群混在小兵潮中冲锋。',
+      traits:['解锁条件：通关 2 关','移速快、血薄','适合用攻速塔点杀'] },
+    speeder:{
+      intro:'巨蛇：奔行者的进化型，更长更壮。',
+      origin:'奔行者变种，肌肉更发达、皮甲略厚。',
+      habits:'比奔行者更快也更结实，甩尾攻击力提高。',
+      traits:['解锁条件：通关 3 关','速度极快·血量中等','尾击伤害高'] },
+    tanker:{
+      intro:'盾兵长：重甲兵的升级，护甲与血量俱厚。',
+      origin:'重甲精英部队，盾更大、刀更重。',
+      habits:'同样在攻击士兵时盾会落下——但破防只在那一瞬，要把握机会。',
+      traits:['解锁条件：通关 4 关','护甲极高、移速极慢','攻击士兵时短暂破防'] },
   }
 };
 // 一句话用于列表预览（占位常量，便于代码读取）
 const CODEX_LIST_NAMES={ arrow:'箭塔系（→ 狙击塔）', mage:'法师塔系（→ 冰霜塔）', cannon:'炮塔系（→ 火焰塔）', barracks:'兵营系（→ 骑士堡）' };
-const CODEX_ENEMY_NAMES={ grunt:'小兵', runner:'奔行者', armor:'重甲兵', flyer:'飞行兵', boss:'魔王' };
+const CODEX_ENEMY_NAMES={
+  grunt:'小兵', runner:'奔行者', armor:'重甲兵', flyer:'飞行兵', boss:'魔王',
+  bossEarth:'山岳之主', bossSpace:'虚空主宰', bossHell:'熔狱魔神',
+  biter:'撕咬虫', speeder:'巨蛇', tanker:'盾兵长',
+};
 
 /* ---------- 路径与建造位 ---------- */
 function pathLen(p){ let L=0; for(let i=1;i<p.length;i++) L+=dist(p[i-1][0],p[i-1][1],p[i][0],p[i][1]); return L; }
@@ -1647,8 +1681,10 @@ function showCodex(){
     const title=`${CODEX_LIST_NAMES[k]} · ${t.tiers.map(x=>x.name).join(' / ')}`;
     add('tw', title, '防御建筑（点开详情）', lore.intro,
       g=>towerArt(g,k,1,15,t.color,false), ()=>showCharDetail('tower',k)); }
-  for(const k of Object.keys(ENEMIES)){ const e=ENEMIES[k], lore=CODEX.enemies[k];
-    add('en', CODEX_ENEMY_NAMES[k], '敌方单位（点开详情）', lore.intro,
+  for(const k of Object.keys(ENEMIES)){ const e=ENEMIES[k];
+    const lore=CODEX.enemies[k] || {intro:'（暂无图鉴信息）',origin:'',habits:'',traits:[]};
+    const name=CODEX_ENEMY_NAMES[k]||e.name||k;
+    add('en', name, '敌方单位（点开详情）', lore.intro,
       g=>enemyArt(g,{type:k,r:Math.min(16,e.r),def:e}), ()=>showCharDetail('enemy',k)); }
   hideOverlays(); $('ovCodex').style.display='flex';
 }
@@ -1686,8 +1722,9 @@ function showCharDetail(kind,key){
     statsHTML=`<table><thead><tr><th>属性</th><th>1 阶</th><th>2 阶</th><th>3 阶 ✦</th></tr></thead><tbody>`+
       rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1][0]}</td><td>${r[1][1]}</td><td>${r[1][2]}</td></tr>`).join('')+`</tbody></table>`;
   } else {
-    const e=ENEMIES[key]; lore=CODEX.enemies[key];
-    nm=CODEX_ENEMY_NAMES[key]; role='敌方单位';
+    const e=ENEMIES[key];
+    lore=CODEX.enemies[key]||{intro:'（暂无）',origin:'—',habits:'—',traits:[]};
+    nm=CODEX_ENEMY_NAMES[key]||e.name||key; role='敌方单位';
     icon=`<canvas width="64" height="64"></canvas>`;
     const rows=[
       ['血量',e.hp], ['移速',e.speed], ['护甲',e.armor], ['魔抗',e.mres||0],
