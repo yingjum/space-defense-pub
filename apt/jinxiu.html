@@ -3,266 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>临安·锦绣山水苑 综合评测</title>
-<meta name="description" content="临安锦城街道 锦绣山水苑 二手房综合评价、价格走势与购房避坑清单。">
+<title>锦绣山水苑 · 临安购房调研</title>
+<meta name="description" content="临安锦城街道 锦绣山水苑 二手房数据档案与现场核实清单。">
 <style>
-  :root {
-    --fg: #1d1d1f;
-    --muted: #5b6168;
-    --bg: #fafaf7;
-    --card: #ffffff;
-    --line: #e4e4e1;
-    --accent: #1f6feb;
-    --warn: #b45309;
-    --good: #166534;
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0;
-    padding: 0;
-    background: var(--bg);
-    color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
-    font-size: 18px;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-  }
-  main {
-    max-width: 820px;
-    margin: 0 auto;
-    padding: 48px 28px 80px;
-  }
-  header.hero {
-    border-bottom: 1px solid var(--line);
-    padding-bottom: 24px;
-    margin-bottom: 32px;
-  }
-  header.hero .kicker {
-    color: var(--muted);
-    font-size: 15px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  h1 {
-    font-size: 30px;
-    line-height: 1.25;
-    margin: 0 0 12px;
-  }
-  header.hero .sub {
-    color: var(--muted);
-    font-size: 16px;
-  }
-  h2 {
-    font-size: 23px;
-    margin: 44px 0 14px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid var(--line);
-  }
-  h3 {
-    font-size: 19px;
-    margin: 28px 0 10px;
-    color: var(--fg);
-  }
-  p { margin: 10px 0; }
-  ul, ol { padding-left: 22px; }
-  li { margin: 6px 0; }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 14px 0 18px;
-    background: var(--card);
-    border: 1px solid var(--line);
-    font-size: 16px;
-  }
-  th, td {
-    text-align: left;
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--line);
-    vertical-align: top;
-  }
-  th {
-    background: #f3f3ee;
-    font-weight: 600;
-    width: 32%;
-  }
-  tr:last-child td { border-bottom: none; }
-  .tag {
-    display: inline-block;
-    font-size: 13px;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: #eef2ff;
-    color: var(--accent);
-    margin-right: 6px;
-  }
-  .tag.warn { background: #fef3c7; color: var(--warn); }
-  .tag.good { background: #dcfce7; color: var(--good); }
-  blockquote {
-    border-left: 4px solid var(--accent);
-    background: #f5f8ff;
-    margin: 16px 0;
-    padding: 12px 16px;
-    color: #1f2937;
-    border-radius: 0 6px 6px 0;
-  }
-  .callout {
-    background: #fff8e6;
-    border: 1px solid #f5d782;
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin: 18px 0;
-    font-size: 17px;
-  }
-  .conclusion {
-    background: #f0f9ff;
-    border: 1px solid #bae6fd;
-    border-radius: 8px;
-    padding: 18px 20px;
-    margin: 24px 0;
-  }
-  .conclusion h2 {
-    border: none;
-    margin-top: 0;
-    padding: 0;
-  }
-  footer {
-    margin-top: 48px;
-    padding-top: 20px;
-    border-top: 1px solid var(--line);
-    font-size: 15px;
-    color: var(--muted);
-  }
-  footer ul { padding-left: 20px; }
-  footer a { color: var(--accent); text-decoration: none; word-break: break-all; }
-  footer a:hover { text-decoration: underline; }
-  .meta-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
-  }
-  @media (max-width: 640px) {
-    main { padding: 28px 18px 60px; }
-    h1 { font-size: 26px; }
-    h2 { font-size: 21px; }
-    th { width: 38%; }
-  }
+  :root{--fg:#1d1d1f;--muted:#5b6168;--bg:#fafaf7;--card:#fff;--line:#e4e4e1;--accent:#1f6feb;--warn:#b45309;--good:#166534;}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue","Microsoft YaHei",sans-serif;font-size:18px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  main{max-width:820px;margin:0 auto;padding:36px 28px 80px}
+  nav.top{font-size:15px;color:var(--muted);margin-bottom:18px}
+  nav.top a{color:var(--accent);text-decoration:none;margin-right:14px}
+  nav.top a:hover{text-decoration:underline}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:28px}
+  header.hero .kicker{color:var(--muted);font-size:15px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px}
+  h1{font-size:30px;line-height:1.25;margin:0 0 12px}
+  header.hero .sub{color:var(--muted);font-size:16px}
+  h2{font-size:23px;margin:40px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  h3{font-size:19px;margin:24px 0 10px}
+  p{margin:10px 0}
+  ul,ol{padding-left:22px}
+  li{margin:6px 0}
+  table{border-collapse:collapse;width:100%;margin:12px 0 18px;background:var(--card);border:1px solid var(--line);font-size:16px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#f3f3ee;font-weight:600;width:32%}
+  tr:last-child td{border-bottom:none}
+  sup.cite a{color:var(--accent);text-decoration:none;font-size:13px;padding:0 2px}
+  sup.cite a:hover{text-decoration:underline}
+  .note{font-size:15px;color:var(--muted)}
+  .callout{background:#fff8e6;border:1px solid #f5d782;border-radius:8px;padding:14px 18px;margin:18px 0;font-size:16px}
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--line);font-size:15px;color:var(--muted)}
+  footer ol{padding-left:22px}
+  footer a{color:var(--accent);text-decoration:none;word-break:break-all}
+  footer a:hover{text-decoration:underline}
+  @media (max-width:640px){main{padding:24px 16px 60px}h1{font-size:26px}h2{font-size:21px}th{width:38%}}
 </style>
 </head>
 <body>
 <main>
 
+<nav class="top">
+  <a href="./">← 对比页</a>
+  <a href="./yinghua.html">樱花府第 →</a>
+</nav>
+
 <header class="hero">
-  <div class="kicker">购房尽调 · 临安区</div>
-  <h1>临安 · 锦绣山水苑 综合评测</h1>
+  <div class="kicker">临安购房调研</div>
+  <h1>锦绣山水苑</h1>
   <div class="sub">用途定位：休假 + 自住 + 国内生活 · 更新时间 2026-05</div>
-  <div class="meta-row">
-    <span class="tag good">绿城物业</span>
-    <span class="tag good">低密度 1.7</span>
-    <span class="tag warn">17年房龄</span>
-    <span class="tag warn">地面停车</span>
-    <span class="tag warn">价格回调 ~38%</span>
-  </div>
 </header>
 
-<h2>一、小区基本档案</h2>
+<h2>一、基本信息</h2>
 <table>
-  <tr><th>位置</th><td>临安区锦城街道 吴越街389号 / 锦溪北路（临安老城核心区）</td></tr>
-  <tr><th>开发商</th><td>杭州锦绣天地房地产开发有限公司（本地中小开发商）</td></tr>
-  <tr><th>物业</th><td>浙江绿城物业管理有限公司（亮点）</td></tr>
-  <tr><th>开盘 / 交付</th><td>2006 年 12 月开盘，2008 年 5 月交付，房龄约 17-18 年</td></tr>
-  <tr><th>规模</th><td>25 栋楼，747 户，占地约 90 亩，建面约 10 万㎡</td></tr>
-  <tr><th>容积率 / 绿化率</th><td>1.7 / 35%（在 2008 年的盘里属偏低密度，舒适）</td></tr>
-  <tr><th>主力户型</th><td>90-130㎡，2 室 / 3 室 / 5 室（含顶跃）多种</td></tr>
-  <tr><th>物业费</th><td>0.5-0.6 元/㎡/月（很便宜）</td></tr>
-  <tr><th>停车</th><td>以地面停车位为主</td></tr>
-  <tr><th>产权</th><td>70 年商品房</td></tr>
+  <tr><th>位置</th><td>临安区锦城街道 吴越街389号 / 锦溪北路<sup class="cite"><a href="#src-1">[1]</a><a href="#src-2">[2]</a></sup></td></tr>
+  <tr><th>开发商</th><td>杭州锦绣天地房地产开发有限公司<sup class="cite"><a href="#src-1">[1]</a></sup>（聚汇数据登记名：临安锦绣房地产开发有限公司<sup class="cite"><a href="#src-2">[2]</a></sup>）</td></tr>
+  <tr><th>物业公司</th><td>浙江绿城世际广场物业管理有限公司<sup class="cite"><a href="#src-1">[1]</a></sup>（聚汇数据登记名：浙江绿城物业管理有限公司<sup class="cite"><a href="#src-2">[2]</a></sup>）</td></tr>
+  <tr><th>开盘 / 交付</th><td>2006 年 12 月开盘，2008 年 5 月交付<sup class="cite"><a href="#src-1">[1]</a></sup>（聚汇数据"建筑年代"标注为 2005 年<sup class="cite"><a href="#src-2">[2]</a></sup>，与百度百科不一致）</td></tr>
+  <tr><th>规模</th><td>25 栋楼，747 户<sup class="cite"><a href="#src-1">[1]</a></sup></td></tr>
+  <tr><th>占地 / 建面</th><td>约 60,000 ㎡ / 约 100,000 ㎡<sup class="cite"><a href="#src-1">[1]</a><a href="#src-2">[2]</a></sup></td></tr>
+  <tr><th>容积率</th><td>1.7<sup class="cite"><a href="#src-1">[1]</a></sup>（聚汇数据：1.69<sup class="cite"><a href="#src-2">[2]</a></sup>）</td></tr>
+  <tr><th>绿化率</th><td>35%<sup class="cite"><a href="#src-1">[1]</a><a href="#src-2">[2]</a></sup></td></tr>
+  <tr><th>主力户型</th><td>90-130 ㎡，含 2 室 / 3 室 / 5 室（含顶跃）等多种<sup class="cite"><a href="#src-1">[1]</a></sup></td></tr>
+  <tr><th>物业费</th><td>0.5-0.6 元/㎡/月<sup class="cite"><a href="#src-1">[1]</a></sup>（聚汇数据：0.5 元/㎡/月<sup class="cite"><a href="#src-2">[2]</a></sup>）</td></tr>
+  <tr><th>停车</th><td>地面停车位<sup class="cite"><a href="#src-2">[2]</a></sup>（具体车位数量未公开）</td></tr>
+  <tr><th>产权年限</th><td>70 年商品房<sup class="cite"><a href="#src-1">[1]</a><a href="#src-2">[2]</a></sup></td></tr>
 </table>
 
-<h2>二、价格情况（关键信号）</h2>
+<h2>二、价格数据</h2>
 <table>
-  <tr><th>2022 年 5 月（峰值）</th><td>约 17,919 元/㎡</td></tr>
-  <tr><th>2024 年 12 月</th><td>约 11,176 元/㎡（同比 -17.8%）</td></tr>
-  <tr><th>2026 年 4 月 临安全区挂牌均价</th><td>约 11,669 元/㎡</td></tr>
+  <tr><th>历史峰值（2022 年 5 月）</th><td>约 17,919 元/㎡<sup class="cite"><a href="#src-2">[2]</a></sup></td></tr>
+  <tr><th>2024 年 12 月挂牌均价</th><td>约 11,176 元/㎡，同比 -17.82%<sup class="cite"><a href="#src-2">[2]</a></sup></td></tr>
+  <tr><th>临安全区挂牌均价（2026 年 4 月）</th><td>约 11,669 元/㎡<sup class="cite"><a href="#src-3">[3]</a></sup></td></tr>
 </table>
-<p><strong>从最高点累计回调约 35-38%。</strong>既是风险，也是议价空间。</p>
+<p class="note">从峰值到 2024 年末，价格回调约 38%（17,919 → 11,176，按聚汇数据原值计算）。</p>
 
-<h2>三、适合该需求的优点（休假 + 自住 + 国内生活）</h2>
-<ol>
-  <li><strong>地段成熟</strong>：锦城街道是临安老城核心，菜场、医院、银行、世纪联华等生活配套都在步行范围；不是远郊新城那种"配套要等几年"的盘。</li>
-  <li><strong>绿城物业</strong>：这是 2008 年盘里少见的"配置错位"，物业品质能拉高居住体验，且物业费便宜。</li>
-  <li><strong>居住环境舒适</strong>：1.7 容积率 + 35% 绿化，对自住与老人居住友好。</li>
-  <li><strong>近自然资源</strong>：钱王陵、青山湖、天目山都在附近，契合休假定位。</li>
-  <li><strong>杭临轨道交通（地铁 16 号线）已通</strong>，往返主城西方便。</li>
-  <li><strong>总价低</strong>：90-130㎡，按当前均价约 100-150 万，外加议价空间，对"非投资型自住"很友好。</li>
-</ol>
-
-<h2>四、容易踩的坑（请逐项确认）</h2>
-
-<h3>A. 房屋本体（17 年房龄的核心关注点）</h3>
-<ol>
-  <li><strong>顶层 / 顶跃慎选</strong>：先看屋面防水、阳台/卫生间是否曾渗漏（2008 年盘高发问题），最好雨季去看一次。</li>
-  <li><strong>电梯和管道</strong>：问物业最近一次电梯大修是哪年、二次供水管道是否已经改造，老旧立管换不换是大工程。</li>
-  <li><strong>外立面与公共部位</strong>：看楼栋外墙瓷砖 / 涂层有无脱落，单元门厅、楼道维护程度。</li>
-  <li><strong>5 室 2 厅"顶跃"户型</strong>：结构复杂、采光通透性差异大，二手房中往往议价空间最大，但漏水风险高，务必实地看。</li>
-  <li><strong>窗户和户型朝向</strong>：2008 年盘多用普通铝合金窗，隔音和保温都偏差，预算上要预留换窗户的钱。</li>
-</ol>
-
-<h3>B. 停车（最容易被卖家美化）</h3>
+<h2>三、其他公开线索</h2>
 <ul>
-  <li>资料显示<strong>以地面停车位为主</strong>。按 747 户、容积率 1.7 推算，车位比大概率不到 1:1。</li>
-  <li>实地建议<strong>工作日晚上 7-9 点</strong>去看一次，看是否有抢车位 / 堵车道现象。</li>
-  <li>问清楚月租金、是否有产权车位在售、是否曾经做过充电桩改造。</li>
+  <li>该小区存在过法拍房源记录<sup class="cite"><a href="#src-4">[4]</a></sup>。</li>
+  <li>挂牌房源中包括"顶跃 5 室"等大户型/复式产品<sup class="cite"><a href="#src-5">[5]</a></sup>。</li>
+  <li>所属锦城街道 2023 年完成过老旧小区综合整治（涉及九、十街区 15 个小区），公开报道未点名锦绣山水苑是否包含在内<sup class="cite"><a href="#src-6">[6]</a></sup>。</li>
 </ul>
 
-<h3>C. 学区（如未来有孩子上学需求）</h3>
+<h2>四、数据未涵盖、需现场核实的事项</h2>
+<p class="note">以下项目在公开数据中没有结论，需到现场或向物业/中介索取：</p>
 <ul>
-  <li>锦城街道有依锦小学、西林小学、锦城二中 / 三中 / 四中等。</li>
-  <li><strong>学区划片每年微调</strong>，不要听中介一句"对口 XX 小学"就信，去临安区教育局官网或派出所学区咨询确认 2026 年最新划片。</li>
-  <li>该小区<strong>不属于顶级学区</strong>，对应学校属于片区普通学校水平。</li>
+  <li>电梯品牌、最近一次大修时间、维保单位</li>
+  <li>二次供水管道是否已改造</li>
+  <li>顶层与顶跃户型的屋面防水情况</li>
+  <li>外立面、单元门厅、楼道维护程度</li>
+  <li>停车位数量与户数之比、产权车位是否在售、月租金、充电桩配置</li>
+  <li>专项维修资金账户余额与近 3 年支用记录</li>
+  <li>当年学区划片以临安区教育局公告为准（每年微调）</li>
+  <li>窗户、隔音、保温等同年代盘普遍弱项的实际情况</li>
 </ul>
 
-<h3>D. 价格与议价</h3>
-<ul>
-  <li><strong>拒绝挂牌价参考</strong>。看链家 / 贝壳 / 安居客最近 3-6 个月真实成交价。</li>
-  <li>临安整体仍在筑底，周边新房供应大（宸锦学府、中天宸著锦庭、蓝城江南山庄等），新房在 2-2.5 万的价位会持续压制次新房和老房，<strong>还价时把"新房参照系"摆出来</strong>。</li>
-  <li>该小区有过法拍房源，如果是急售 / 法拍来源，议价空间更大。</li>
-</ul>
-
-<h3>E. 维修基金 / 公维资金</h3>
-<ul>
-  <li>17 年房龄的小区，<strong>业主大会维修基金账户余额</strong>是隐藏要点，因为接下来 3-5 年大修概率上升。</li>
-  <li>让中介调取小区<strong>最近 3 年专项维修资金支用记录</strong>。</li>
-  <li>物业费 0.5-0.6 元在杭州属于偏低水平，意味着精细化维护资源有限，老化速度比同年代 1.5-2 元物业费小区快。</li>
-</ul>
-
-<h3>F. 度假属性的特殊提醒</h3>
-<p>既然房子大概率会<strong>间歇性空置</strong>：</p>
-<ul>
-  <li>选<strong>中间层、不临街、单元入户安全性好</strong>的房源。</li>
-  <li>检查<strong>水管的防冻</strong>情况，临安冬季偶尔零下，长期空置无人放水会冻管。</li>
-  <li>长期不住时<strong>断电、断主水阀</strong>的可执行性（强电箱位置、总阀位置）。</li>
-</ul>
-
-<div class="conclusion">
-<h2>五、一句话结论</h2>
-<p>锦绣山水苑作为"休假 + 自住"是<strong>合格的过日子盘</strong>：地段不错、绿城物业、低密度、低总价，符合休假 + 国内生活的定位。</p>
-<p><strong>但它不是保值升值的盘</strong>，临安全区房价仍在下行，跌幅大于杭州主城。</p>
-<p>建议按<strong>"使用价值"而非"资产价值"</strong>买：把它当一台"会折旧的车"，享受居住体验，而非指望它增值。趁市场偏冷，<strong>砸价空间至少给到 8-15%</strong>，不要按挂牌价成交。</p>
+<div class="callout">
+不同来源对建成年份（2005 / 2008）、容积率（1.69 / 1.7）、开发商与物业公司全称、物业费区间存在不一致；签约前以购房合同与不动产登记为准。
 </div>
 
 <footer>
-<p><strong>资料来源：</strong></p>
-<ul>
-  <li><a href="https://baike.baidu.com/item/%E9%94%A6%E7%BB%A3%E5%B1%B1%E6%B0%B4%E8%8B%91/22968440" target="_blank" rel="noopener">锦绣山水苑 · 百度百科</a></li>
-  <li><a href="https://fangjia.gotohui.com/info-450703.html" target="_blank" rel="noopener">锦绣山水苑 · 杭州临安区房价 gotohui</a></li>
-  <li><a href="https://m.fang.com/fapai/hz/out_12271349.html" target="_blank" rel="noopener">锦绣山水苑法拍房 · 房天下</a></li>
-  <li><a href="https://m.fang.com/esf/hz/EAGT_129364562.html" target="_blank" rel="noopener">锦绣山水苑顶跃户型房源 · 房天下</a></li>
-  <li><a href="https://www.hangzhou.gov.cn/art/2023/11/24/art_812264_59090045.html" target="_blank" rel="noopener">临安：锦城新颜 · 杭州市政府</a></li>
-  <li><a href="https://m.anjuke.com/hz/trendency/linanq/" target="_blank" rel="noopener">临安房价走势 · 安居客</a></li>
-</ul>
-<p style="margin-top: 20px;">本页为个人调研笔记，不构成投资建议。</p>
+<p><strong>信息来源：</strong></p>
+<ol>
+  <li id="src-1"><a href="https://baike.baidu.com/item/%E9%94%A6%E7%BB%A3%E5%B1%B1%E6%B0%B4%E8%8B%91/22968440" target="_blank" rel="noopener">百度百科 · 锦绣山水苑</a></li>
+  <li id="src-2"><a href="https://fangjia.gotohui.com/info-450703.html" target="_blank" rel="noopener">聚汇数据 · 锦绣山水苑（杭州临安区）</a></li>
+  <li id="src-3"><a href="https://m.anjuke.com/hz/trendency/linanq/" target="_blank" rel="noopener">安居客 · 临安房价走势</a></li>
+  <li id="src-4"><a href="https://m.fang.com/fapai/hz/out_12271349.html" target="_blank" rel="noopener">房天下 · 锦绣山水苑法拍房</a></li>
+  <li id="src-5"><a href="https://m.fang.com/esf/hz/EAGT_129364562.html" target="_blank" rel="noopener">房天下 · 锦绣山水苑顶跃 5 室房源</a></li>
+  <li id="src-6"><a href="https://www.hangzhou.gov.cn/art/2023/11/24/art_812264_59090045.html" target="_blank" rel="noopener">杭州市政府 · 临安：锦城新颜（老旧小区改造）</a></li>
+</ol>
+<p style="margin-top:18px;">本页为个人调研笔记，仅汇编公开数据，不构成投资建议。</p>
 </footer>
 
 </main>
